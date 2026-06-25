@@ -1,0 +1,18 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+    level: 3
+    ignoreErrors:
+        # Larastan tidak bisa infer tipe eager-loaded relation ->product pada collection items
+        - '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$product_name#'
+        # Larastan tidak bisa infer tipe relasi Eloquent magic properties
+        - '#Access to an undefined property App\\Models\\.*::\$#'
+        # Larastan false positive untuk relasi yang didefinisikan via method
+        - '#Relation .* is not found in App\\Models\\.*#'
+    excludePaths:
+        - app/Jobs/TestQueueJob.php
+        - app/Jobs/GenerateDocumentNumberJob.php
+        - app/Providers/HorizonServiceProvider.php
