@@ -103,5 +103,5 @@ Route::middleware(['auth', 'role:SALESMAN'])->prefix('pwa')->name('pwa.pages.')-
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/visits', VisitList::class)->name('visits');
     Route::get('/stock', StockBalance::class)->name('stock');
-    Route::get('/visits/{visitPlan}', VisitDetail::class)->name('visits.detail');
+    Route::get('/visits/{visitPlan}', VisitDetail::class)->name('visits.detail')->whereNumber('visitPlan');
 });
