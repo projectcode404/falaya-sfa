@@ -38,6 +38,7 @@ Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/closing', [AdminController::class, 'closing'])->name('closing');
     Route::get('/products', ProductManager::class)->name('products');
+    Route::get('/areas', \App\Livewire\Admin\AreaManager::class)->name('areas');
     Route::post('/closing/execute', [AdminController::class, 'executeClosing'])->name('closing.execute');
 });
 
