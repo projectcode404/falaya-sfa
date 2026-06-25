@@ -11,6 +11,8 @@ use App\Http\Controllers\Pwa\SalesOrderController;
 use App\Http\Controllers\Pwa\VisitController;
 use App\Http\Controllers\Reports\ReportsController;
 use App\Http\Controllers\Settings\SettingsController;
+use App\Livewire\Admin\AreaManager;
+use App\Livewire\Admin\CustomerManager;
 use App\Livewire\Admin\ProductManager;
 use App\Livewire\Pwa\Dashboard;
 use App\Livewire\Pwa\StockBalance;
@@ -38,7 +40,8 @@ Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/closing', [AdminController::class, 'closing'])->name('closing');
     Route::get('/products', ProductManager::class)->name('products');
-    Route::get('/areas', \App\Livewire\Admin\AreaManager::class)->name('areas');
+    Route::get('/areas', AreaManager::class)->name('areas');
+    Route::get('/customers', CustomerManager::class)->name('customers');
     Route::post('/closing/execute', [AdminController::class, 'executeClosing'])->name('closing.execute');
 });
 
