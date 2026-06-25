@@ -1,0 +1,59 @@
+name: falaya-sfa
+
+services:
+  laravel:
+    build:
+      context: ./docker/laravel
+      dockerfile: Dockerfile
+    container_name: falaya_laravel
+    restart: unless-stopped
+    ports:
+      - "8089:80"
+    volumes:
+      - ./src:/app
+      - falaya_storage:/app/storage
+      - falaya_bootstrap_cache:/app/bootstrap/cache
+    env_file:
+      - ./src/.env
+    networks:
+      - sikap-app_sikap-network
+      - falaya-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  horizon:
+    build:
+      context: ./docker/worker
+      dockerfile: Dockerfile
+    container_name: falaya_horizon
+    restart: unless-stopped
+    command: php artisan horizon
+    volumes:
+      - ./src:/app
+      - falaya_storage:/app/storage
+    env_file:
+      - ./src/.env
+    networks:
+      - sikap-app_sikap-network
+      - falaya-internal
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan horizon:status | grep -q running || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  sikap-app_sikap-network:
+    external: true
+  falaya-internal:
+    driver: bridge
+
+volumes:
+  falaya_storage:
+    name: falaya_storage_data
+  falaya_bootstrap_cache:
+    name: falaya_bootstrap_cache
