@@ -11,6 +11,7 @@ use App\Http\Controllers\Pwa\SalesOrderController;
 use App\Http\Controllers\Pwa\VisitController;
 use App\Http\Controllers\Reports\ReportsController;
 use App\Http\Controllers\Settings\SettingsController;
+use App\Livewire\Admin\ProductManager;
 use App\Livewire\Pwa\Dashboard;
 use App\Livewire\Pwa\StockBalance;
 use App\Livewire\Pwa\VisitDetail;
@@ -36,6 +37,7 @@ Route::middleware(['auth', 'role:OWNER'])->prefix('owner')->name('owner.')->grou
 Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/closing', [AdminController::class, 'closing'])->name('closing');
+    Route::get('/products', ProductManager::class)->name('products');
     Route::post('/closing/execute', [AdminController::class, 'executeClosing'])->name('closing.execute');
 });
 
