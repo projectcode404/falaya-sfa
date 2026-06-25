@@ -13,6 +13,7 @@ use App\Http\Controllers\Reports\ReportsController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Livewire\Pwa\Dashboard;
 use App\Livewire\Pwa\StockBalance;
+use App\Livewire\Pwa\VisitDetail;
 use App\Livewire\Pwa\VisitList;
 use App\Models\PaymentReceipt;
 use Illuminate\Support\Facades\Route;
@@ -102,4 +103,5 @@ Route::middleware(['auth', 'role:SALESMAN'])->prefix('pwa')->name('pwa.pages.')-
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/visits', VisitList::class)->name('visits');
     Route::get('/stock', StockBalance::class)->name('stock');
+    Route::get('/visits/{visitPlan}', VisitDetail::class)->name('visits.detail');
 });
