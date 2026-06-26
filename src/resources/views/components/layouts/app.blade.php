@@ -32,9 +32,7 @@
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <form method="POST" action="/logout">
                             @csrf
-                            <button type="submit" class="dropdown-item text-danger">
-                                Keluar
-                            </button>
+                            <button type="submit" class="dropdown-item text-danger">Keluar</button>
                         </form>
                     </div>
                 </div>
@@ -48,6 +46,7 @@
             <div class="navbar navbar-light">
                 <div class="container-xl">
                     <ul class="navbar-nav">
+
                         @if(Auth::user()->hasRole('OWNER'))
                             <li class="nav-item {{ request()->is('owner/dashboard') ? 'active' : '' }}">
                                 <a class="nav-link" href="/owner/dashboard">
@@ -100,6 +99,29 @@
                                     <span class="nav-link-title">Tutup Hari</span>
                                 </a>
                             </li>
+
+                            {{-- Master Data dropdown --}}
+                            <li class="nav-item dropdown {{ request()->is('admin/products*','admin/areas*','admin/customers*','admin/users*','admin/visit-schedules*') ? 'active' : '' }}">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>
+                                    </span>
+                                    <span class="nav-link-title">Master Data</span>
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item {{ request()->is('admin/products*') ? 'active' : '' }}"
+                                        href="/admin/products">Produk</a>
+                                    <a class="dropdown-item {{ request()->is('admin/areas*') ? 'active' : '' }}"
+                                        href="/admin/areas">Area</a>
+                                    <a class="dropdown-item {{ request()->is('admin/customers*') ? 'active' : '' }}"
+                                        href="/admin/customers">Customer</a>
+                                    <a class="dropdown-item {{ request()->is('admin/users*') ? 'active' : '' }}"
+                                        href="/admin/users">User</a>
+                                    <a class="dropdown-item {{ request()->is('admin/visit-schedules*') ? 'active' : '' }}"
+                                        href="/admin/visit-schedules">Jadwal Kunjungan</a>
+                                </div>
+                            </li>
+
                             <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
                                 <a class="nav-link" href="/reports/sales">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -109,6 +131,7 @@
                                 </a>
                             </li>
                         @endif
+
                     </ul>
                 </div>
             </div>
@@ -117,31 +140,8 @@
 
     <!-- Page content -->
     <div class="page-wrapper">
-        <div class="container-xl">
-            <div class="page-header d-print-none">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h2 class="page-title">{{ $heading ?? '' }}</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="page-body">
-            <div class="container-xl">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-                {{ $slot }}
-            </div>
+            {{ $slot }}
         </div>
     </div>
 </div>
