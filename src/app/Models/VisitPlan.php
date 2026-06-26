@@ -33,6 +33,16 @@ class VisitPlan extends Model
         ];
     }
 
+    public function collectionTask()
+    {
+        return $this->hasOne(CollectionTask::class, 'visit_plan_id');
+    }
+
+    public function salesOrders()
+    {
+        return $this->hasMany(SalesOrder::class);
+    }
+
     public function salesman()
     {
         return $this->belongsTo(User::class, 'salesman_id');
