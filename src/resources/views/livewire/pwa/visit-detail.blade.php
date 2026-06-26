@@ -195,6 +195,10 @@
             </button>
         </div>
 
+        <div x-show="status === 'IN_PROGRESS'" class="d-grid mt-2">
+            <a href="/pwa/visits/{{ $visitPlan->id }}/order" class="btn btn-primary btn-lg">🛒 Buat Pesanan</a>
+        </div>
+
         <div x-show="['COMPLETED','NO_ORDER','OUTLET_CLOSED'].includes(status)" x-cloak class="falaya-card falaya-card--success mt-2">
             <div class="card-body text-center">
                 <div class="falaya-card__title">✅ Kunjungan selesai</div>

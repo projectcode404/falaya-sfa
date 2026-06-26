@@ -15,6 +15,7 @@ use App\Livewire\Admin\AreaManager;
 use App\Livewire\Admin\CustomerManager;
 use App\Livewire\Admin\ProductManager;
 use App\Livewire\Pwa\Dashboard;
+use App\Livewire\Pwa\SalesOrderCreate;
 use App\Livewire\Pwa\StockBalance;
 use App\Livewire\Pwa\VisitDetail;
 use App\Livewire\Pwa\VisitList;
@@ -110,4 +111,5 @@ Route::middleware(['auth', 'role:SALESMAN'])->prefix('pwa')->name('pwa.pages.')-
     Route::get('/visits', VisitList::class)->name('visits');
     Route::get('/stock', StockBalance::class)->name('stock');
     Route::get('/visits/{visitPlan}', VisitDetail::class)->name('visits.detail')->whereNumber('visitPlan');
+    Route::get('/visits/{visitPlan}/order', SalesOrderCreate::class)->name('visits.order')->whereNumber('visitPlan');
 });
