@@ -100,6 +100,22 @@
                                 </a>
                             </li>
 
+                            {{-- Inventory dropdown --}}
+                            <li class="nav-item dropdown {{ request()->is('admin/stock-loading*','admin/stock-unloading*','admin/cash-reconciliation*','admin/payment-transfer*') ? 'active' : '' }}">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/><path d="M12 12l8 -4.5"/><path d="M12 12l0 9"/><path d="M12 12l-8 -4.5"/></svg>
+                                    </span>
+                                    <span class="nav-link-title">Inventory</span>
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item {{ request()->is('admin/stock-loading*') ? 'active' : '' }}" href="/admin/stock-loading">Stock Loading</a>
+                                    <a class="dropdown-item {{ request()->is('admin/stock-unloading*') ? 'active' : '' }}" href="/admin/stock-unloading">Stock Unloading</a>
+                                    <a class="dropdown-item {{ request()->is('admin/cash-reconciliation*') ? 'active' : '' }}" href="/admin/cash-reconciliation">Cash Reconciliation</a>
+                                    <a class="dropdown-item {{ request()->is('admin/payment-transfer*') ? 'active' : '' }}" href="/admin/payment-transfer">Payment Transfer</a>
+                                </div>
+                            </li>
+
                             {{-- Master Data dropdown --}}
                             <li class="nav-item dropdown {{ request()->is('admin/products*','admin/areas*','admin/customers*','admin/users*','admin/visit-schedules*') ? 'active' : '' }}">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">

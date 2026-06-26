@@ -12,6 +12,11 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             SettingsSeeder::class,
             UserSeeder::class,
+            AreaSeeder::class,
+            ProductSeeder::class,
+            InitialStockSeeder::class,
+            CustomerSeeder::class,
+            VisitScheduleSeeder::class,
         ]);
     }
 }

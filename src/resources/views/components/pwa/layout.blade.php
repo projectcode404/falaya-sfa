@@ -49,8 +49,22 @@
             <span class="nav-icon">📦</span>Stok
         </a>
     </nav>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('order-success', () => {
+                setTimeout(() => window.location.reload(), 1500);
+            });
+
+            Livewire.on('payment-success', () => {
+                const parts = window.location.pathname.split('/');
+                const visitPlanId = parts[3] ?? null;
+                setTimeout(() => {
+                    window.location.href = visitPlanId ? '/pwa/visits/' + visitPlanId : '/pwa/visits';
+                }, 1500);
+            });
+        });
+    </script>
     @livewireScripts
 </body>
 </html>

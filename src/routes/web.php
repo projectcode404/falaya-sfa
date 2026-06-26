@@ -12,8 +12,15 @@ use App\Http\Controllers\Pwa\VisitController;
 use App\Http\Controllers\Reports\ReportsController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Livewire\Admin\AreaManager;
+use App\Livewire\Admin\CashReconciliationForm;
 use App\Livewire\Admin\CustomerManager;
+use App\Livewire\Admin\PaymentTransferForm;
 use App\Livewire\Admin\ProductManager;
+use App\Livewire\Admin\StockLoadingForm;
+use App\Livewire\Admin\StockUnloadingForm;
+use App\Livewire\Admin\UserManager;
+use App\Livewire\Admin\VisitScheduleManager;
+use App\Livewire\Pwa\CollectionCreate;
 use App\Livewire\Pwa\Dashboard;
 use App\Livewire\Pwa\SalesOrderCreate;
 use App\Livewire\Pwa\StockBalance;
@@ -40,10 +47,16 @@ Route::middleware(['auth', 'role:OWNER'])->prefix('owner')->name('owner.')->grou
 Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/closing', [AdminController::class, 'closing'])->name('closing');
+    Route::post('/closing/execute', [AdminController::class, 'executeClosing'])->name('closing.execute');
     Route::get('/products', ProductManager::class)->name('products');
     Route::get('/areas', AreaManager::class)->name('areas');
     Route::get('/customers', CustomerManager::class)->name('customers');
-    Route::post('/closing/execute', [AdminController::class, 'executeClosing'])->name('closing.execute');
+    Route::get('/users', UserManager::class)->name('users');
+    Route::get('/visit-schedules', VisitScheduleManager::class)->name('visit-schedules');
+    Route::get('/stock-loading', StockLoadingForm::class)->name('stock-loading');
+    Route::get('/stock-unloading', StockUnloadingForm::class)->name('stock-unloading');
+    Route::get('/cash-reconciliation', CashReconciliationForm::class)->name('cash-reconciliation');
+    Route::get('/payment-transfer', PaymentTransferForm::class)->name('payment-transfer');
 });
 
 // Shared routes (Owner + Admin)
@@ -112,4 +125,5 @@ Route::middleware(['auth', 'role:SALESMAN'])->prefix('pwa')->name('pwa.pages.')-
     Route::get('/stock', StockBalance::class)->name('stock');
     Route::get('/visits/{visitPlan}', VisitDetail::class)->name('visits.detail')->whereNumber('visitPlan');
     Route::get('/visits/{visitPlan}/order', SalesOrderCreate::class)->name('visits.order')->whereNumber('visitPlan');
+    Route::get('/visits/{visitPlan}/collection', CollectionCreate::class)->name('visits.collection')->whereNumber('visitPlan');
 });

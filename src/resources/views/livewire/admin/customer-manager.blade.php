@@ -69,21 +69,39 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Latitude</label>
-                                <input type="number" step="0.0000001" class="form-control @error('latitude') is-invalid @enderror"
+                                <input type="number" step="0.0000001" id="map-lat"
+                                    class="form-control @error('latitude') is-invalid @enderror"
                                     wire:model="latitude" placeholder="-6.2000000">
                                 @error('latitude') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Longitude</label>
-                                <input type="number" step="0.0000001" class="form-control @error('longitude') is-invalid @enderror"
+                                <input type="number" step="0.0000001" id="map-lng"
+                                    class="form-control @error('longitude') is-invalid @enderror"
                                     wire:model="longitude" placeholder="106.8000000">
                                 @error('longitude') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Radius Toleransi (meter)</label>
-                                <input type="number" class="form-control @error('radius_tolerance_meter') is-invalid @enderror"
+                                <input type="number" id="map-radius"
+                                    class="form-control @error('radius_tolerance_meter') is-invalid @enderror"
                                     wire:model="radius_tolerance_meter" placeholder="100">
                                 @error('radius_tolerance_meter') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">
+                                    Pin Lokasi Outlet
+                                    <span class="text-muted small ms-1">— klik peta untuk pindah pin, atau gunakan tombol di bawah</span>
+                                </label>
+                                <div class="mb-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="useMyLocation()">
+                                        📍 Gunakan Lokasi Saya
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="resetMap()">
+                                        🔄 Reset Peta
+                                    </button>
+                                </div>
+                                <div id="outlet-map" style="height: 300px; border-radius: 8px; border: 1px solid #dee2e6; z-index:0;"></div>
                             </div>
 
                             @if($customer_type === 'CREDIT')
@@ -209,4 +227,144 @@
 
         </div>
     </div>
+    @if($showForm)
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let outletMap = null;
+        let outletMarker = null;
+        let outletCircle = null;
+
+        function initMap() {
+            if (outletMap) {
+                outletMap.remove();
+                outletMap = null;
+                outletMarker = null;
+                outletCircle = null;
+            }
+
+            const latVal = parseFloat(document.getElementById("map-lat")?.value);
+            const lngVal = parseFloat(document.getElementById("map-lng")?.value);
+            const hasCoord = !isNaN(latVal) && !isNaN(lngVal);
+
+            const center = hasCoord ? [latVal, lngVal] : [-6.2088, 106.8456];
+            const zoom = hasCoord ? 17 : 12;
+
+            outletMap = L.map("outlet-map").setView(center, zoom);
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "© OpenStreetMap contributors",
+                maxZoom: 19,
+            }).addTo(outletMap);
+
+            if (hasCoord) {
+                placeMarker(latVal, lngVal);
+            }
+
+            outletMap.on("click", function (e) {
+                placeMarker(e.latlng.lat, e.latlng.lng);
+                updateInputs(e.latlng.lat, e.latlng.lng);
+            });
+        }
+
+        function placeMarker(lat, lng) {
+            if (outletMarker) {
+                outletMap.removeLayer(outletMarker);
+            }
+            if (outletCircle) {
+                outletMap.removeLayer(outletCircle);
+            }
+
+            outletMarker = L.marker([lat, lng], { draggable: true }).addTo(outletMap);
+            outletMarker.bindPopup("📍 Lokasi Outlet").openPopup();
+
+            outletMarker.on("dragend", function (e) {
+                const pos = e.target.getLatLng();
+                updateInputs(pos.lat, pos.lng);
+                drawRadius(pos.lat, pos.lng);
+            });
+
+            drawRadius(lat, lng);
+        }
+
+        function drawRadius(lat, lng) {
+            if (outletCircle) {
+                outletMap.removeLayer(outletCircle);
+            }
+            const radiusInput = document.getElementById("map-radius");
+            const radius = parseInt(radiusInput?.value) || 100;
+            outletCircle = L.circle([lat, lng], {
+                radius: radius,
+                color: "#206bc4",
+                fillColor: "#206bc4",
+                fillOpacity: 0.1,
+                weight: 2,
+            }).addTo(outletMap);
+        }
+
+        function updateInputs(lat, lng) {
+            const latInput = document.getElementById("map-lat");
+            const lngInput = document.getElementById("map-lng");
+            if (latInput) {
+                latInput.value = lat.toFixed(7);
+                latInput.dispatchEvent(new Event("input"));
+            }
+            if (lngInput) {
+                lngInput.value = lng.toFixed(7);
+                lngInput.dispatchEvent(new Event("input"));
+            }
+        }
+
+        function useMyLocation() {
+            if (!navigator.geolocation) {
+                alert("Browser tidak mendukung geolocation.");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    updateInputs(lat, lng);
+                    if (outletMap) {
+                        outletMap.setView([lat, lng], 17);
+                        placeMarker(lat, lng);
+                    }
+                },
+                function () {
+                    alert("Gagal mendapatkan lokasi. Pastikan izin lokasi diberikan.");
+                }
+            );
+        }
+
+        function resetMap() {
+            if (outletMarker) outletMap.removeLayer(outletMarker);
+            if (outletCircle) outletMap.removeLayer(outletCircle);
+            outletMarker = null;
+            outletCircle = null;
+            updateInputs("", "");
+            outletMap.setView([-6.2088, 106.8456], 12);
+        }
+
+        // Init peta saat form muncul, dan saat Livewire update
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(initMap, 100);
+        });
+
+        document.addEventListener("livewire:navigated", function () {
+            setTimeout(initMap, 100);
+        });
+
+        Livewire.on("formOpened", function () {
+            setTimeout(initMap, 150);
+        });
+
+        // Redraw radius saat input radius berubah
+        document.addEventListener("input", function (e) {
+            if (e.target.id === "map-radius" && outletMarker) {
+                const pos = outletMarker.getLatLng();
+                drawRadius(pos.lat, pos.lng);
+            }
+        });
+    </script>
+    @endif
 </div>

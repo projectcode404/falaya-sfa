@@ -90,6 +90,7 @@ class CustomerManager extends Component
         $this->resetForm();
         $this->isEdit = false;
         $this->showForm = true;
+        $this->dispatch('formOpened');
     }
 
     public function openEdit(int $id): void
@@ -110,6 +111,7 @@ class CustomerManager extends Component
         $this->owner_phone = $c->owner_phone ?? '';
         $this->isEdit = true;
         $this->showForm = true;
+        $this->dispatch('formOpened');
     }
 
     public function save(): void

@@ -1,18 +1,22 @@
 <?php
 
-namespace App\Livewire\Pwa;
+namespace App\Livewire\Admin;
 
 use App\Actions\Collection\CreatePaymentAction;
 use App\Actions\Collection\PostPaymentAction;
-use App\Models\CollectionTask;
+use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\VisitPlan;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
-class CollectionCreate extends Component
+class PaymentTransferForm extends Component
 {
-    public VisitPlan $visitPlan;
+    public string $search = '';
+
+    public array $customers = [];
+
+    public ?int $selectedCustomerId = null;
+
+    public ?string $selectedCustomerName = null;
 
     public array $invoices = [];
 
@@ -26,28 +30,51 @@ class CollectionCreate extends Component
 
     public string $submitSuccess = '';
 
-    public function mount(VisitPlan $visitPlan): void
+    public function mount(): void
     {
-        if ($visitPlan->salesman_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->loadCustomers();
+    }
 
-        $this->visitPlan = $visitPlan->load('customer');
+    public function updatedSearch(): void
+    {
+        $this->loadCustomers();
+    }
 
-        $this->invoices = Invoice::where('customer_id', $visitPlan->customer_id)
+    public function loadCustomers(): void
+    {
+        $this->customers = Customer::where('customer_type', 'CREDIT')
+            ->where('status', 'ACTIVE')
+            ->when($this->search, fn ($q) => $q->where('customer_name', 'like', '%'.$this->search.'%'))
+            ->orderBy('customer_name')
+            ->limit(20)
+            ->get(['id', 'customer_name', 'customer_code'])
+            ->toArray();
+    }
+
+    public function selectCustomer(int $customerId): void
+    {
+        $customer = Customer::findOrFail($customerId);
+
+        $this->selectedCustomerId = $customer->id;
+        $this->selectedCustomerName = $customer->customer_name;
+        $this->submitError = '';
+        $this->submitSuccess = '';
+
+        $this->invoices = Invoice::where('customer_id', $customerId)
             ->whereIn('status', ['UNPAID', 'PARTIAL', 'OVERDUE'])
             ->orderBy('due_date')
             ->get()
             ->map(fn ($inv) => [
                 'id' => $inv->id,
                 'invoice_number' => $inv->invoice_number,
-                'total_amount' => (float) $inv->total_amount,
                 'remaining_amount' => (float) $inv->remaining_amount,
                 'due_date' => is_string($inv->due_date) ? $inv->due_date : $inv->due_date->format('d/m/Y'),
                 'status' => $inv->status,
             ])
             ->toArray();
 
+        $this->selected = [];
+        $this->amounts = [];
         foreach ($this->invoices as $inv) {
             $this->selected[$inv['id']] = false;
             $this->amounts[$inv['id']] = $inv['remaining_amount'];
@@ -71,10 +98,16 @@ class CollectionCreate extends Component
         return $total;
     }
 
-    public function submitPayment(CreatePaymentAction $createAction, PostPaymentAction $postAction): void
+    public function submitTransfer(CreatePaymentAction $createAction, PostPaymentAction $postAction): void
     {
         $this->submitError = '';
         $this->submitSuccess = '';
+
+        if (! $this->selectedCustomerId) {
+            $this->submitError = 'Pilih customer terlebih dahulu.';
+
+            return;
+        }
 
         $allocations = [];
         foreach ($this->invoices as $inv) {
@@ -96,18 +129,22 @@ class CollectionCreate extends Component
 
         try {
             $payment = $createAction->execute(
-                $this->visitPlan->customer_id,
+                $this->selectedCustomerId,
                 $total,
-                'CASH',
+                'TRANSFER',
                 $allocations,
-                $this->visitPlan->id,
+                null,
                 $this->notes ?: null,
             );
 
             $payment = $postAction->execute($payment);
 
-            $this->submitSuccess = "Pembayaran {$payment->payment_number} berhasil dicatat!";
-            $this->dispatch('payment-success');
+            $this->submitSuccess = "Payment {$payment->payment_number} berhasil dicatat! Receipt: {$payment->receipt->receipt_number}";
+
+            $this->selectedCustomerId = null;
+            $this->selectedCustomerName = null;
+            $this->invoices = [];
+            $this->notes = '';
 
         } catch (\RuntimeException $e) {
             $this->submitError = $e->getMessage();
@@ -116,43 +153,8 @@ class CollectionCreate extends Component
         }
     }
 
-    public function submitSkip(string $reason): void
-    {
-        $this->submitError = '';
-        $this->submitSuccess = '';
-
-        $taskId = $this->visitPlan->collectionTask?->id;
-
-        if (! $taskId) {
-            $this->dispatch('payment-success');
-
-            return;
-        }
-
-        $task = CollectionTask::find($taskId);
-
-        if (! $task || $task->salesman_id !== Auth::id()) {
-            $this->submitError = 'Collection Task tidak ditemukan.';
-
-            return;
-        }
-
-        $status = $reason === 'reschedule' ? 'RESCHEDULED' : 'NO_PAYMENT';
-
-        $task->update([
-            'status' => $status,
-            'result_notes' => $this->notes ?: $reason,
-            'updated_at' => now(),
-        ]);
-
-        $this->submitSuccess = 'Penagihan dilewati.';
-        $this->dispatch('payment-success');
-    }
-
     public function render()
     {
-        return view('livewire.pwa.collection-create', [
-            'total' => $this->getTotal(),
-        ])->layout('components.pwa.layout', ['title' => 'Catat Pembayaran']);
+        return view('livewire.admin.payment-transfer-form');
     }
 }
