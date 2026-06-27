@@ -44,7 +44,7 @@
     <span class="section-label">📍 Belum Dikunjungi ({{ $pending->count() }})</span>
     <div class="section-group">
         @foreach ($pending->sortByDesc(fn($v) => $v['status'] === 'IN_PROGRESS') as $visit)
-        <a href="{{ route('pwa.visits.show', $visit['id']) }}" class="visit-card d-flex">
+        <a href="{{ route('pwa.pages.visits.detail', $visit['id']) }}" class="visit-card d-flex">
             {{-- icon --}}
             <div class="visit-icon" style="background:{{ $visit['status'] === 'IN_PROGRESS' ? '#dbeafe' : '#f4f6fb' }}">
                 {{ $visit['status'] === 'IN_PROGRESS' ? '📡' : '📍' }}
@@ -93,7 +93,7 @@
 
         <div x-show="open" x-collapse>
             @foreach ($done as $visit)
-            <a href="{{ route('pwa.visits.show', $visit['id']) }}" class="visit-card d-flex">
+            <a href="{{ route('pwa.pages.visits.detail', $visit['id']) }}" class="visit-card d-flex">
                 <div class="visit-icon" style="background:#f4f6fb">
                     @switch($visit['status'])
                         @case('COMPLETED')  <span>🛒</span> @break
@@ -138,7 +138,7 @@
     {{-- ── FAB: Kunjungan Tidak Terjadwal ────────────────────────── --}}
     <button
         class="fab"
-        onclick="window.location.href='{{ route('pwa.visits.unplanned') }}'"
+        onclick="window.location.href='{{ route('pwa.pages.visits.unplanned') }}'"
         title="Kunjungan Tidak Terjadwal"
     >＋</button>
 

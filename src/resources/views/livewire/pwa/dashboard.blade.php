@@ -139,11 +139,11 @@
     <div class="px-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="section-label mb-0">📍 Outlet Selanjutnya</div>
-            <a href="{{ route('pwa.visits') }}" style="font-size:0.8rem;color:#206bc4;text-decoration:none;font-weight:600">Lihat Semua →</a>
+            <a href="{{ route('pwa.pages.visits') }}" style="font-size:0.8rem;color:#206bc4;text-decoration:none;font-weight:600">Lihat Semua →</a>
         </div>
 
         @foreach ($pendingVisits->take(3) as $visit)
-        <a href="{{ route('pwa.visits.show', $visit['id']) }}" class="visit-preview-card">
+        <a href="{{ route('pwa.pages.visits.detail', $visit['id']) }}" class="visit-preview-card">
             <div style="font-size:1.2rem">📍</div>
             <div class="flex-grow-1 overflow-hidden">
                 <div style="font-size:0.9rem;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $visit['customer_name'] }}</div>
@@ -159,7 +159,7 @@
         @endforeach
 
         @if (count($pendingVisits) > 3)
-        <a href="{{ route('pwa.visits') }}" class="d-block text-center py-2" style="font-size:0.85rem;color:#206bc4;text-decoration:none">
+        <a href="{{ route('pwa.pages.visits') }}" class="d-block text-center py-2" style="font-size:0.85rem;color:#206bc4;text-decoration:none">
             +{{ count($pendingVisits) - 3 }} outlet lagi →
         </a>
         @endif

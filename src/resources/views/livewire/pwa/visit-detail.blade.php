@@ -30,7 +30,7 @@
     </style>
 
     {{-- ── Back nav ─────────────────────────────────────────────────── --}}
-    <a href="{{ route('pwa.visits') }}" class="back-btn">
+    <a href="{{ route('pwa.pages.visits') }}" class="back-btn">
         ‹ Daftar Kunjungan
     </a>
 
@@ -273,7 +273,7 @@
                 </div>
                 @endforeach
 
-                <a href="{{ route('pwa.collection.create', $visit->id) }}"
+                <a href="{{ route('pwa.pages.visits.collection', $visit->id) }}"
                    class="d-block w-100 mt-3 py-2 text-center fw-600"
                    style="background:#f59f00;color:white;border-radius:8px;text-decoration:none;font-weight:600;min-height:44px;line-height:2.5">
                     💰 Tagih Sekarang
@@ -282,10 +282,10 @@
             @endif
 
             {{-- Primary actions --}}
-            <a href="{{ route('pwa.orders.create', $visit->id) }}" class="action-btn-primary mb-2 d-flex" style="text-decoration:none">
+            <a href="{{ route('pwa.pages.visits.order', $visit->id) }}" class="action-btn-primary mb-2 d-flex" style="text-decoration:none">
                 🛒 Buat Pesanan
             </a>
-            <a href="{{ route('pwa.collection.create', $visit->id) }}" class="action-btn-outline mb-3 d-flex" style="text-decoration:none">
+            <a href="{{ route('pwa.pages.visits.collection', $visit->id) }}" class="action-btn-outline mb-3 d-flex" style="text-decoration:none">
                 💰 Catat Pembayaran
             </a>
 
@@ -313,7 +313,7 @@
                 @endswitch
             </div>
         </div>
-        <a href="{{ route('pwa.visits') }}" class="action-btn-outline d-flex" style="text-decoration:none">
+        <a href="{{ route('pwa.pages.visits') }}" class="action-btn-outline d-flex" style="text-decoration:none">
             ‹ Kembali ke Daftar
         </a>
         @endif

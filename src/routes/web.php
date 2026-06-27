@@ -126,4 +126,5 @@ Route::middleware(['auth', 'role:SALESMAN'])->prefix('pwa')->name('pwa.pages.')-
     Route::get('/visits/{visitPlan}', VisitDetail::class)->name('visits.detail')->whereNumber('visitPlan');
     Route::get('/visits/{visitPlan}/order', SalesOrderCreate::class)->name('visits.order')->whereNumber('visitPlan');
     Route::get('/visits/{visitPlan}/collection', CollectionCreate::class)->name('visits.collection')->whereNumber('visitPlan');
+    Route::get('/visits/unplanned', fn () => redirect()->route('pwa.pages.visits'))->name('visits.unplanned');
 });
