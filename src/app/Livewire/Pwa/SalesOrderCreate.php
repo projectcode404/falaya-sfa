@@ -5,6 +5,7 @@ namespace App\Livewire\Pwa;
 use App\Actions\Sales\CreateSalesOrderAction;
 use App\Actions\Sales\PostSalesOrderAction;
 use App\Actions\Sales\RequestCreditOverrideAction;
+use App\Models\Invoice;
 use App\Models\StockBalance;
 use App\Models\VisitPlan;
 use Illuminate\Support\Facades\Auth;
@@ -121,8 +122,45 @@ class SalesOrderCreate extends Component
 
     public function render()
     {
+        $customer = $this->visitPlan->customer;
+
+        // Outstanding untuk credit limit bar
+        $customerOutstanding = 0;
+        if ($customer->customer_type === 'CREDIT') {
+            $customerOutstanding = Invoice::where('customer_id', $customer->id)
+                ->whereIn('status', ['UNPAID', 'PARTIAL', 'OVERDUE'])
+                ->sum('remaining_amount');
+        }
+
+        // Produk yang tersedia (dari stok bawaan salesman)
+        $stockBalances = StockBalance::with('product')
+            ->where('holder_type', 'SALESMAN')
+            ->where('holder_id', Auth::id())
+            ->where('condition', 'GOOD')
+            ->where('qty', '>', 0)
+            ->get();
+
+        $availableProducts = $stockBalances->map(fn ($s) => $s->product)->filter()->values();
+
+        $stockItems = $stockBalances->map(fn ($s) => [
+            'product_id' => $s->product_id,
+            'qty' => (float) $s->qty,
+        ])->values();
+
+        // Items sebagai collection untuk firstWhere di blade
+        $items = collect($this->items);
+
         return view('livewire.pwa.sales-order-create', [
             'total' => $this->getTotal(),
+            'customer' => $customer,
+            'customerOutstanding' => (float) $customerOutstanding,
+            'availableProducts' => $availableProducts,
+            'stockItems' => $stockItems,
+            'items' => $items,
+            'paymentType' => $this->payment_type,
+            'receiverName' => $this->receiver_name,
+            'submitError' => $this->submitError,
+            'submitSuccess' => $this->submitSuccess,
         ])->layout('components.pwa.layout', ['title' => 'Buat Pesanan']);
     }
 }
