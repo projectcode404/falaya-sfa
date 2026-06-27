@@ -227,7 +227,6 @@
 
         </div>
     </div>
-    @if($showForm)
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
@@ -236,6 +235,10 @@
         let outletCircle = null;
 
         function initMap() {
+            // Guard: tunggu sampai elemen peta benar-benar ada di DOM
+            const mapEl = document.getElementById("outlet-map");
+            if (!mapEl) return;
+
             if (outletMap) {
                 outletMap.remove();
                 outletMap = null;
@@ -347,15 +350,47 @@
 
         // Init peta saat form muncul, dan saat Livewire update
         document.addEventListener("DOMContentLoaded", function () {
-            setTimeout(initMap, 100);
+            setTimeout(initMap, 200);
+        });
+
+        document.addEventListener("livewire:updated", function () {
+            setTimeout(initMap, 200);
         });
 
         document.addEventListener("livewire:navigated", function () {
-            setTimeout(initMap, 100);
+            setTimeout(initMap, 200);
         });
 
-        Livewire.on("formOpened", function () {
-            setTimeout(initMap, 150);
+        // Gunakan window event listener agar aman sebelum Livewire selesai boot
+        window.addEventListener("formOpened", function () {
+            let attempts = 0;
+            const interval = setInterval(function () {
+                attempts++;
+                if (document.getElementById("outlet-map")) {
+                    clearInterval(interval);
+                    initMap();
+                } else if (attempts >= 10) {
+                    clearInterval(interval);
+                }
+            }, 200);
+        });
+
+        // Fallback: hook ke Livewire setelah DOM ready
+        document.addEventListener("DOMContentLoaded", function () {
+            if (typeof window.Livewire !== "undefined") {
+                window.Livewire.on("formOpened", function () {
+                    let attempts = 0;
+                    const interval = setInterval(function () {
+                        attempts++;
+                        if (document.getElementById("outlet-map")) {
+                            clearInterval(interval);
+                            initMap();
+                        } else if (attempts >= 10) {
+                            clearInterval(interval);
+                        }
+                    }, 200);
+                });
+            }
         });
 
         // Redraw radius saat input radius berubah
@@ -366,5 +401,4 @@
             }
         });
     </script>
-    @endif
 </div>

@@ -91,6 +91,7 @@ class CustomerManager extends Component
         $this->isEdit = false;
         $this->showForm = true;
         $this->dispatch('formOpened');
+        $this->js('window.dispatchEvent(new CustomEvent("formOpened"))');
     }
 
     public function openEdit(int $id): void
@@ -112,6 +113,7 @@ class CustomerManager extends Component
         $this->isEdit = true;
         $this->showForm = true;
         $this->dispatch('formOpened');
+        $this->js('window.dispatchEvent(new CustomEvent("formOpened"))');
     }
 
     public function save(): void
