@@ -44,7 +44,7 @@
         .back-btn { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #616876; text-decoration: none; padding: 12px 16px 4px; }
     </style>
 
-    <a href="{{ route('pwa.visits.show', $visitPlan->id) }}" class="back-btn">‹ Detail Kunjungan</a>
+    <a href="{{ route('pwa.pages.visits.detail', $visitPlan->id) }}" class="back-btn">‹ Detail Kunjungan</a>
 
     <div
         class="px-3 pt-1"

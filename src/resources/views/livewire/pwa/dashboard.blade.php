@@ -71,7 +71,7 @@
                             stroke-dashoffset="{{ $offset }}"
                         />
                     </svg>
-                    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(90deg)">
+                    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
                         <span style="font-size:1rem;font-weight:700;color:#206bc4">{{ $pct }}%</span>
                     </div>
                 </div>

@@ -37,7 +37,7 @@
         .select-all-btn { font-size: 0.8rem; color: #206bc4; font-weight: 600; text-decoration: none; background: none; border: none; padding: 0; }
     </style>
 
-    <a href="{{ route('pwa.visits.show', $visitPlan->id) }}" class="back-btn">‹ Detail Kunjungan</a>
+    <a href="{{ route('pwa.pages.visits.detail', $visitPlan->id) }}" class="back-btn">‹ Detail Kunjungan</a>
 
     <div
         class="px-3 pt-1"
