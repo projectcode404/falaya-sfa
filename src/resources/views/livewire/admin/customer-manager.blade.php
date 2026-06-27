@@ -35,7 +35,8 @@
                             <div class="col-md-3">
                                 <label class="form-label required">Kode Customer</label>
                                 <input type="text" class="form-control @error('customer_code') is-invalid @enderror"
-                                    wire:model="customer_code" placeholder="CST-001">
+                                    wire:model="customer_code" placeholder="CST-001" {{ !$isEdit ? 'readonly' : '' }}>
+                                <div class="form-hint">{{ !$isEdit ? 'Kode otomatis, bisa diubah bila perlu.' : '' }}</div>
                                 @error('customer_code') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-5">
@@ -62,7 +63,11 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label required">Tipe</label>
-                                <select class="form-select" wire:model.live="customer_type">
+                                <select class="form-select" wire:model="customer_type"
+                                    x-on:change="
+                                        $wire.set('customer_type', $event.target.value);
+                                        setTimeout(() => window.dispatchEvent(new CustomEvent('formOpened')), 50);
+                                    ">
                                     <option value="CASH">CASH</option>
                                     <option value="CREDIT">CREDIT</option>
                                 </select>
@@ -104,7 +109,7 @@
                                 <div id="outlet-map" style="height: 300px; border-radius: 8px; border: 1px solid #dee2e6; z-index:0;"></div>
                             </div>
 
-                            @if($customer_type === 'CREDIT')
+                            <template x-if="$wire.customer_type === 'CREDIT'">
                                 <div class="col-md-4">
                                     <label class="form-label required">Limit Kredit</label>
                                     <div class="input-group">
@@ -133,7 +138,7 @@
                                     <label class="form-label">No. HP Pemilik</label>
                                     <input type="text" class="form-control" wire:model="owner_phone" placeholder="08123456789">
                                 </div>
-                            @endif
+                            </template>
                         </div>
                     </div>
                     <div class="card-footer d-flex gap-2">

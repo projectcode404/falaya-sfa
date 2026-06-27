@@ -85,9 +85,26 @@ class CustomerManager extends Component
         $this->resetPage();
     }
 
+    private function generateCustomerCode(): string
+    {
+        $last = Customer::withTrashed()
+            ->where('customer_code', 'like', 'CST-%')
+            ->orderByDesc('customer_code')
+            ->value('customer_code');
+
+        if (! $last) {
+            return 'CST-001';
+        }
+
+        $number = (int) substr($last, 4);
+
+        return 'CST-'.str_pad($number + 1, 3, '0', STR_PAD_LEFT);
+    }
+
     public function openCreate(): void
     {
         $this->resetForm();
+        $this->customer_code = $this->generateCustomerCode();
         $this->isEdit = false;
         $this->showForm = true;
         $this->dispatch('formOpened');

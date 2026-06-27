@@ -34,6 +34,7 @@
         .badge-status-outlet_closed { background: #cfe2ff; color: #084298; }
         .badge-status-in_progress { background: #fff3cd; color: #664d03; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/pwa.css') }}">
     @livewireStyles
 </head>
 <body>
