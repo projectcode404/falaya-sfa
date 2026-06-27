@@ -16,14 +16,20 @@ class StockLoadingForm extends Component
 {
     use WithPagination;
 
-    // Form buat loading baru
     public bool $showForm = false;
 
     public string $salesman_id = '';
 
     public array $items = [];
 
-    // List
+    // Product search
+    public string $productSearch = '';
+
+    public array $searchResults = [];
+
+    public bool $showSearchResults = false;
+
+    // List filter
     public string $filterSalesman = '';
 
     protected function rules(): array
@@ -43,33 +49,97 @@ class StockLoadingForm extends Component
 
     public function openCreate(): void
     {
-        $this->reset(['salesman_id', 'items']);
-        $this->initItems();
+        $this->reset(['salesman_id', 'items', 'productSearch', 'searchResults']);
+        $this->showSearchResults = false;
         $this->showForm = true;
     }
 
-    public function updatedSalesmanId(): void
+    public function updatedProductSearch(): void
     {
-        $this->initItems();
-    }
+        $search = trim($this->productSearch);
 
-    private function initItems(): void
-    {
-        $this->items = Product::where('is_active', true)
+        if (strlen($search) < 2) {
+            $this->searchResults = [];
+            $this->showSearchResults = false;
+
+            return;
+        }
+
+        $existingIds = collect($this->items)->pluck('product_id')->toArray();
+
+        $this->searchResults = Product::where('is_active', true)
+            ->where(function ($q) use ($search) {
+                $q->where('product_name', 'ilike', "%{$search}%")
+                    ->orWhere('variant', 'ilike', "%{$search}%")
+                    ->orWhere('product_code', 'ilike', "%{$search}%");
+            })
+            ->whereNotIn('id', $existingIds)
             ->orderBy('product_name')
+            ->orderBy('variant')
+            ->limit(8)
             ->get()
-            ->map(fn ($p) => [
-                'product_id' => $p->id,
-                'product_name' => $p->product_name,
-                'unit' => $p->unit,
-                'gudang_qty' => (float) StockBalance::where('product_id', $p->id)
+            ->map(function ($p) {
+                $gudangQty = (float) (StockBalance::where('product_id', $p->id)
                     ->where('holder_type', 'WAREHOUSE')
                     ->whereNull('holder_id')
                     ->where('condition', 'GOOD')
-                    ->value('qty') ?? 0,
-                'qty' => 0,
-            ])
+                    ->value('qty') ?? 0);
+
+                return [
+                    'product_id' => $p->id,
+                    'product_name' => $p->product_name,
+                    'variant' => $p->variant ?? '',
+                    'unit' => $p->unit,
+                    'gudang_qty' => $gudangQty,
+                ];
+            })
             ->toArray();
+
+        $this->showSearchResults = count($this->searchResults) > 0;
+    }
+
+    public function addProduct(int $productId): void
+    {
+        // Cegah duplikat
+        foreach ($this->items as $item) {
+            if ((int) $item['product_id'] === $productId) {
+                $this->productSearch = '';
+                $this->searchResults = [];
+                $this->showSearchResults = false;
+
+                return;
+            }
+        }
+
+        $product = Product::find($productId);
+        if (! $product) {
+            return;
+        }
+
+        $gudangQty = (float) (StockBalance::where('product_id', $productId)
+            ->where('holder_type', 'WAREHOUSE')
+            ->whereNull('holder_id')
+            ->where('condition', 'GOOD')
+            ->value('qty') ?? 0);
+
+        $this->items[] = [
+            'product_id' => $product->id,
+            'product_name' => $product->product_name,
+            'variant' => $product->variant ?? '',
+            'unit' => $product->unit,
+            'gudang_qty' => $gudangQty,
+            'qty' => 0,
+        ];
+
+        $this->productSearch = '';
+        $this->searchResults = [];
+        $this->showSearchResults = false;
+    }
+
+    public function removeItem(int $index): void
+    {
+        array_splice($this->items, $index, 1);
+        $this->items = array_values($this->items);
     }
 
     public function save(
@@ -99,13 +169,13 @@ class StockLoadingForm extends Component
         }
 
         $this->showForm = false;
-        $this->reset(['salesman_id', 'items']);
+        $this->reset(['salesman_id', 'items', 'productSearch', 'searchResults']);
     }
 
     public function cancelForm(): void
     {
         $this->showForm = false;
-        $this->reset(['salesman_id', 'items']);
+        $this->reset(['salesman_id', 'items', 'productSearch', 'searchResults']);
     }
 
     public function render(OperationalDateService $dateService)
@@ -115,7 +185,10 @@ class StockLoadingForm extends Component
             ->orderByDesc('created_at')
             ->paginate(15);
 
-        $salesmen = User::where('role', 'SALESMAN')->where('is_active', true)->orderBy('name')->get();
+        $salesmen = User::where('role', 'SALESMAN')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
         return view('livewire.admin.stock-loading-form', compact('loadings', 'salesmen'))
             ->layout('components.layouts.app', ['title' => 'Stock Loading']);
