@@ -21,6 +21,10 @@ class SalesOrderCreate extends Component
 
     public array $items = [];
 
+    public int $step = 1;
+
+    public string $search = '';
+
     public string $submitError = '';
 
     public string $submitSuccess = '';
@@ -55,17 +59,56 @@ class SalesOrderCreate extends Component
         ])->values()->toArray();
     }
 
-    public function incrementQty(int $index): void
+    public function nextStep(): void
     {
-        if ($this->items[$index]['qty'] < $this->items[$index]['max_qty']) {
-            $this->items[$index]['qty']++;
+        $total = collect($this->items)->sum(fn ($i) => $i['qty'] * $i['unit_price']);
+        if (collect($this->items)->sum(fn ($i) => $i['qty'] * $i['unit_price']) > 0) {
+            $this->step = 2;
         }
     }
 
-    public function decrementQty(int $index): void
+    public function prevStep(): void
     {
-        if ($this->items[$index]['qty'] > 0) {
-            $this->items[$index]['qty']--;
+        $this->step = 1;
+    }
+
+    public function setPaymentType(string $type): void
+    {
+        $this->payment_type = $type;
+    }
+
+    public function incrementQty(int $productId): void
+    {
+        foreach ($this->items as $i => $item) {
+            if ((int) $item['product_id'] === $productId) {
+                if ($this->items[$i]['qty'] < $this->items[$i]['max_qty']) {
+                    $this->items[$i]['qty']++;
+                }
+                break;
+            }
+        }
+    }
+
+    public function decrementQty(int $productId): void
+    {
+        foreach ($this->items as $i => $item) {
+            if ((int) $item['product_id'] === $productId) {
+                if ($this->items[$i]['qty'] > 0) {
+                    $this->items[$i]['qty']--;
+                }
+                break;
+            }
+        }
+    }
+
+    public function setQty(int $productId, mixed $value): void
+    {
+        $qty = max(0, (int) $value);
+        foreach ($this->items as $i => $item) {
+            if ((int) $item['product_id'] === $productId) {
+                $this->items[$i]['qty'] = min($qty, (int) $this->items[$i]['max_qty']);
+                break;
+            }
         }
     }
 
@@ -107,6 +150,10 @@ class SalesOrderCreate extends Component
             $this->submitSuccess = "Order {$salesOrder->document_number} berhasil!";
             $this->dispatch('order-success');
 
+            $this->redirect(route('pwa.pages.visits.detail', $this->visitPlan->id), navigate: false);
+
+            return;
+
         } catch (\RuntimeException $e) {
             if ($salesOrder && str_contains($e->getMessage(), 'credit limit')) {
                 $overrideAction->execute($salesOrder->fresh());
@@ -140,7 +187,7 @@ class SalesOrderCreate extends Component
             ->where('qty', '>', 0)
             ->get();
 
-        $availableProducts = $stockBalances->map(fn ($s) => $s->product)->filter()->values();
+        $availableProducts = $stockBalances->map(fn ($s) => $s->product)->filter()->when($this->search, fn ($c) => $c->filter(fn ($p) => str_contains(strtolower($p->product_name), strtolower($this->search))))->values();
 
         $stockItems = $stockBalances->map(fn ($s) => [
             'product_id' => $s->product_id,
@@ -151,7 +198,7 @@ class SalesOrderCreate extends Component
         $items = collect($this->items);
 
         return view('livewire.pwa.sales-order-create', [
-            'total' => $this->getTotal(),
+            'total' => collect($this->items)->sum(fn ($i) => $i['qty'] * $i['unit_price']),
             'customer' => $customer,
             'customerOutstanding' => (float) $customerOutstanding,
             'availableProducts' => $availableProducts,
@@ -161,6 +208,10 @@ class SalesOrderCreate extends Component
             'receiverName' => $this->receiver_name,
             'submitError' => $this->submitError,
             'submitSuccess' => $this->submitSuccess,
+            'step' => $this->step,
+            'overLimit' => $customer->customer_type === 'CREDIT' && $customer->credit_limit
+                ? (($customerOutstanding + collect($this->items)->sum(fn ($i) => $i['qty'] * $i['unit_price'])) > $customer->credit_limit)
+                : false,
         ])->layout('components.pwa.layout', ['title' => 'Buat Pesanan']);
     }
 }

@@ -134,8 +134,9 @@
             },
 
             confirmCheckin() {
+                const data = this.gpsInfo ?? { unavailable: true };
                 {{-- delegate to Livewire --}}
-                @this.call('checkin', this.gpsInfo);
+                @this.call('checkin', data);
             }
         }"
     >

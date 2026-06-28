@@ -9,6 +9,7 @@
     <title>{{ $title ?? 'Falaya SFA' }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
     <style>
+        :root { --pwa-navbar-h: 64px; }
         body { background: #f4f6fb; font-family: 'Inter', sans-serif; padding-bottom: 72px; }
         .falaya-card { border-radius: 14px; border: 1px solid #e5e9f0; margin-bottom: 12px; background: #fff; }
         .falaya-card .card-body { padding: 16px; }
@@ -34,7 +35,6 @@
         .badge-status-outlet_closed { background: #cfe2ff; color: #084298; }
         .badge-status-in_progress { background: #fff3cd; color: #664d03; }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/pwa.css') }}">
     @livewireStyles
 </head>
 <body>
