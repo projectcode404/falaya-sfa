@@ -89,7 +89,6 @@ class PostSalesOrderAction
                 'updated_by' => auth()->id(),
                 'updated_at' => now(),
             ]);
-            $salesOrder->visitPlan->update(['status' => 'COMPLETED']);
             if ($salesOrder->isCredit()) {
                 $this->generateInvoice($salesOrder);
             }

@@ -12,35 +12,36 @@ class CustomerSeeder extends Seeder
     public function run(): void
     {
         $salesman = User::where('email', 'salesman@falaya.test')->first();
+
         if (! $salesman) {
             return;
         }
 
-        $areaJktBar = Area::where('area_code', 'JKT-BAR')->first();
-        $areaJktSel = Area::where('area_code', 'JKT-SEL')->first();
-        $areaJktTim = Area::where('area_code', 'JKT-TIM')->first();
+        $areaSbyBar = Area::where('area_code', 'SBY-BAR')->first();
+        $areaSbySel = Area::where('area_code', 'SBY-SEL')->first();
+        $areaSbyTim = Area::where('area_code', 'SBY-TIM')->first();
 
         $customers = [
             [
                 'customer_code' => 'CST-001',
                 'customer_name' => 'Warung Bu Sari',
-                'address' => 'Jl. Kebon Jeruk No. 12, Jakarta Barat',
-                'area_id' => $areaJktBar?->id ?? 1,
+                'address' => 'Jl. Tandes Lor No. 12, Surabaya Barat',
+                'area_id' => $areaSbyBar?->id ?? 1,
                 'customer_type' => 'CASH',
                 'status' => 'ACTIVE',
-                'latitude' => -6.1944,
-                'longitude' => 106.7749,
+                'latitude' => -7.2697,
+                'longitude' => 112.6650,
                 'radius_tolerance_meter' => 100,
             ],
             [
                 'customer_code' => 'CST-002',
                 'customer_name' => 'Toko Berkah Jaya',
-                'address' => 'Jl. Puri Indah No. 45, Jakarta Barat',
-                'area_id' => $areaJktBar?->id ?? 1,
+                'address' => 'Jl. Manukan Kulon No. 45, Surabaya Barat',
+                'area_id' => $areaSbyBar?->id ?? 1,
                 'customer_type' => 'CREDIT',
                 'status' => 'ACTIVE',
-                'latitude' => -6.1876,
-                'longitude' => 106.7463,
+                'latitude' => -7.2452,
+                'longitude' => 112.6891,
                 'radius_tolerance_meter' => 150,
                 'credit_limit' => 2000000,
                 'credit_term_days' => 14,
@@ -50,12 +51,12 @@ class CustomerSeeder extends Seeder
             [
                 'customer_code' => 'CST-003',
                 'customer_name' => 'Minimarket Sumber Rejeki',
-                'address' => 'Jl. Fatmawati No. 88, Jakarta Selatan',
-                'area_id' => $areaJktSel?->id ?? 2,
+                'address' => 'Jl. Wonokromo No. 88, Surabaya Selatan',
+                'area_id' => $areaSbySel?->id ?? 2,
                 'customer_type' => 'CREDIT',
                 'status' => 'ACTIVE',
-                'latitude' => -6.2943,
-                'longitude' => 106.7946,
+                'latitude' => -7.3197,
+                'longitude' => 112.7280,
                 'radius_tolerance_meter' => 100,
                 'credit_limit' => 5000000,
                 'credit_term_days' => 30,
@@ -65,23 +66,23 @@ class CustomerSeeder extends Seeder
             [
                 'customer_code' => 'CST-004',
                 'customer_name' => 'Warung Pak Darto',
-                'address' => 'Jl. Cempaka No. 3, Jakarta Selatan',
-                'area_id' => $areaJktSel?->id ?? 2,
+                'address' => 'Jl. Jambangan No. 3, Surabaya Selatan',
+                'area_id' => $areaSbySel?->id ?? 2,
                 'customer_type' => 'CASH',
                 'status' => 'ACTIVE',
-                'latitude' => -6.2611,
-                'longitude' => 106.8117,
+                'latitude' => -7.3312,
+                'longitude' => 112.7185,
                 'radius_tolerance_meter' => 100,
             ],
             [
                 'customer_code' => 'CST-005',
                 'customer_name' => 'Toko Makmur Sentosa',
-                'address' => 'Jl. Kramat Jati No. 21, Jakarta Timur',
-                'area_id' => $areaJktTim?->id ?? 3,
+                'address' => 'Jl. Rungkut Asri No. 21, Surabaya Timur',
+                'area_id' => $areaSbyTim?->id ?? 3,
                 'customer_type' => 'CREDIT',
                 'status' => 'ACTIVE',
-                'latitude' => -6.2741,
-                'longitude' => 106.8652,
+                'latitude' => -7.3219,
+                'longitude' => 112.7831,
                 'radius_tolerance_meter' => 100,
                 'credit_limit' => 3000000,
                 'credit_term_days' => 14,
@@ -91,12 +92,12 @@ class CustomerSeeder extends Seeder
             [
                 'customer_code' => 'CST-006',
                 'customer_name' => 'Warung Mba Yuni',
-                'address' => 'Jl. Pondok Kopi No. 7, Jakarta Timur',
-                'area_id' => $areaJktTim?->id ?? 3,
+                'address' => 'Jl. Gunung Anyar No. 7, Surabaya Timur',
+                'area_id' => $areaSbyTim?->id ?? 3,
                 'customer_type' => 'CASH',
                 'status' => 'ACTIVE',
-                'latitude' => -6.2512,
-                'longitude' => 106.9023,
+                'latitude' => -7.3387,
+                'longitude' => 112.7950,
                 'radius_tolerance_meter' => 100,
             ],
         ];

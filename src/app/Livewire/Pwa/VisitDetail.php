@@ -41,6 +41,8 @@ class VisitDetail extends Component
             $this->visitPlan->refresh()->load(['customer.area', 'realization']);
         } catch (\RuntimeException $e) {
             $this->dispatch('checkin-error', message: $e->getMessage());
+        } catch (\LogicException $e) {
+            $this->visitPlan->refresh()->load(['customer.area', 'realization']);
         }
     }
 

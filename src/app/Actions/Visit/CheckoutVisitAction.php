@@ -15,6 +15,7 @@ class CheckoutVisitAction
         }
 
         $realization = $visitPlan->realization;
+
         if (! $realization) {
             throw new \LogicException('Visit Realization tidak ditemukan.');
         }
@@ -26,11 +27,16 @@ class CheckoutVisitAction
                 'checkout_at' => now(),
             ]);
 
-            // Status ditentukan oleh apakah ada Sales Order -- default NO_ORDER dulu
-            // akan di-update ke COMPLETED saat Sales Order di-POST
-            if ($visitPlan->status === 'IN_PROGRESS') {
-                $visitPlan->update(['status' => 'NO_ORDER']);
-            }
+            // Status final ditentukan SAAT checkout (bukan saat order POSTED) --
+            // sesuai PRD Bagian 8.5: COMPLETED hanya bermakna "ada order",
+            // checkout tetap aksi eksplisit terpisah dari posting Sales Order.
+            $hasPostedOrder = $visitPlan->salesOrders()
+                ->where('status', 'POSTED')
+                ->exists();
+
+            $visitPlan->update([
+                'status' => $hasPostedOrder ? 'COMPLETED' : 'NO_ORDER',
+            ]);
 
             return $realization->fresh();
         });

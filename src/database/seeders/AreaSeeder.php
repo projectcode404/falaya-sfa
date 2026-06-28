@@ -10,14 +10,14 @@ class AreaSeeder extends Seeder
     public function run(): void
     {
         $areas = [
-            ['area_code' => 'JKT-BAR', 'area_name' => 'Jakarta Barat'],
-            ['area_code' => 'JKT-SEL', 'area_name' => 'Jakarta Selatan'],
-            ['area_code' => 'JKT-TIM', 'area_name' => 'Jakarta Timur'],
-            ['area_code' => 'JKT-UTA', 'area_name' => 'Jakarta Utara'],
-            ['area_code' => 'JKT-PUS', 'area_name' => 'Jakarta Pusat'],
-            ['area_code' => 'TGR',     'area_name' => 'Tangerang'],
-            ['area_code' => 'BKS',     'area_name' => 'Bekasi'],
-            ['area_code' => 'DPK',     'area_name' => 'Depok'],
+            ['area_code' => 'SBY-BAR', 'area_name' => 'Surabaya Barat'],
+            ['area_code' => 'SBY-SEL', 'area_name' => 'Surabaya Selatan'],
+            ['area_code' => 'SBY-TIM', 'area_name' => 'Surabaya Timur'],
+            ['area_code' => 'SBY-UTA', 'area_name' => 'Surabaya Utara'],
+            ['area_code' => 'SBY-PUS', 'area_name' => 'Surabaya Pusat'],
+            ['area_code' => 'SDA',     'area_name' => 'Sidoarjo'],
+            ['area_code' => 'GSK',     'area_name' => 'Gresik'],
+            ['area_code' => 'MJK',     'area_name' => 'Mojokerto'],
         ];
 
         foreach ($areas as $area) {

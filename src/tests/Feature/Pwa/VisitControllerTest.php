@@ -3,6 +3,8 @@
 use App\Models\Area;
 use App\Models\Customer;
 use App\Models\OperationalDate;
+use App\Models\Product;
+use App\Models\StockBalance;
 use App\Models\User;
 use App\Models\VisitPlan;
 use Illuminate\Support\Str;
@@ -200,4 +202,73 @@ it('salesman dapat membuat unplanned visit ke customer berbeda', function () {
 it('endpoint checkin memerlukan autentikasi', function () {
     $response = $this->postJson('/pwa/api/visits/checkin', []);
     $response->assertStatus(401);
+});
+
+// --- CHECKOUT STATUS BERDASARKAN SALES ORDER ---
+it('checkout setelah ada sales order POSTED menghasilkan status COMPLETED', function () {
+    ['salesman' => $salesman, 'visitPlan' => $visitPlan, 'customer' => $customer] = makeVisitPlan();
+
+    $this->actingAs($salesman)->postJson('/pwa/api/visits/checkin', [
+        'visit_plan_id' => $visitPlan->id,
+        'idempotency_key' => (string) Str::uuid(),
+        'gps_unavailable' => true,
+    ]);
+
+    $product = Product::create([
+        'product_code' => 'PRD-'.uniqid(),
+        'product_name' => 'Keripik Original',
+        'unit' => 'pcs',
+        'selling_price' => 5000,
+        'is_active' => true,
+        'created_by' => $salesman->id,
+        'created_at' => now(),
+    ]);
+
+    StockBalance::create([
+        'product_id' => $product->id,
+        'holder_type' => 'SALESMAN',
+        'holder_id' => $salesman->id,
+        'condition' => 'GOOD',
+        'qty' => 50,
+        'updated_at' => now(),
+    ]);
+
+    $storeResp = $this->actingAs($salesman)->postJson('/pwa/api/sales-orders', [
+        'visit_plan_id' => $visitPlan->id,
+        'customer_id' => $customer->id,
+        'payment_type' => 'CASH',
+        'items' => [
+            ['product_id' => $product->id, 'qty' => 5, 'unit_price' => 5000],
+        ],
+    ]);
+    $salesOrderId = $storeResp->json('sales_order_id');
+
+    $postResp = $this->actingAs($salesman)->postJson("/pwa/api/sales-orders/{$salesOrderId}/post");
+    $postResp->assertStatus(200);
+
+    expect($visitPlan->fresh()->status)->toBe('IN_PROGRESS');
+
+    $checkoutResp = $this->actingAs($salesman)->postJson('/pwa/api/visits/checkout', [
+        'visit_plan_id' => $visitPlan->id,
+    ]);
+    $checkoutResp->assertStatus(200);
+
+    expect($visitPlan->fresh()->status)->toBe('COMPLETED');
+});
+
+it('checkout tanpa sales order tetap menghasilkan status NO_ORDER walau ada collection', function () {
+    ['salesman' => $salesman, 'visitPlan' => $visitPlan] = makeVisitPlan();
+
+    $this->actingAs($salesman)->postJson('/pwa/api/visits/checkin', [
+        'visit_plan_id' => $visitPlan->id,
+        'idempotency_key' => (string) Str::uuid(),
+        'gps_unavailable' => true,
+    ]);
+
+    $checkoutResp = $this->actingAs($salesman)->postJson('/pwa/api/visits/checkout', [
+        'visit_plan_id' => $visitPlan->id,
+    ]);
+    $checkoutResp->assertStatus(200);
+
+    expect($visitPlan->fresh()->status)->toBe('NO_ORDER');
 });

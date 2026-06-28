@@ -5,7 +5,6 @@
          ============================================================ --}}
 
     <style>
-        .falaya-card { border-radius: 12px; border: 1px solid #e6e7e9; margin-bottom: 12px; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
         .section-label { font-size: 0.75rem; font-weight: 600; color: #616876; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 16px; margin-bottom: 6px; margin-top: 16px; display: block; }
         .visit-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 70px; text-decoration: none; color: inherit; border-bottom: 1px solid #f0f0f0; }
         .visit-card:last-child { border-bottom: none; }
@@ -20,8 +19,6 @@
         .bs-skipped    { background:#fee2e2;color:#991b1b; }
         .status-badge  { font-size:0.7rem;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap; }
         .section-group { background:white;border-radius:12px;border:1px solid #e6e7e9;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden;margin:0 12px 12px; }
-        .fab { position:fixed;bottom:80px;right:16px;z-index:100;width:52px;height:52px;border-radius:50%;background:#206bc4;color:white;border:none;box-shadow:0 4px 12px rgba(32,107,196,0.4);font-size:1.4rem;display:flex;align-items:center;justify-content:center; }
-        .fab:active { transform:scale(0.95); }
         .section-toggle { display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f8f9fa;border-bottom:1px solid #e6e7e9;cursor:pointer;user-select:none; }
         .section-toggle-label { font-size:0.8rem;font-weight:600;color:#374151; }
         .section-toggle-count { font-size:0.75rem;color:#616876;background:#e6e7e9;padding:2px 8px;border-radius:20px; }

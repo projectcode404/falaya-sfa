@@ -138,7 +138,7 @@ it('can create and post cash sales order', function () {
 
     expect($so->fresh()->status)->toBe('POSTED')
         ->and((float) $salesmanStock->qty)->toBe(40.0)
-        ->and($visitPlan->fresh()->status)->toBe('COMPLETED');
+        ->and($visitPlan->fresh()->status)->toBe('IN_PROGRESS');
 });
 
 it('can create and post credit sales order and generate invoice', function () {

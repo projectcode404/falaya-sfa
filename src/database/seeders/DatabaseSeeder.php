@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             InitialStockSeeder::class,
             CustomerSeeder::class,
+            StockLoadingSeeder::class,
+            CreditInvoiceSeeder::class,
             VisitScheduleSeeder::class,
         ]);
     }

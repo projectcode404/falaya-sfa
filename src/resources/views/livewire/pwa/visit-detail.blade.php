@@ -133,10 +133,13 @@
                 return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             },
 
-            confirmCheckin() {
+            async confirmCheckin() {
                 const data = this.gpsInfo ?? { unavailable: true };
-                {{-- delegate to Livewire --}}
-                @this.call('checkin', data);
+                {{-- delegate to Livewire, tunggu response server sebelum
+                     update UI state -- tanpa await, gpsState bisa nyangkut
+                     di state lama walau server sudah sukses ubah status --}}
+                await @this.call('checkin', data);
+                this.gpsState = 'done';
             }
         }"
     >

@@ -24,6 +24,7 @@ use App\Livewire\Pwa\CollectionCreate;
 use App\Livewire\Pwa\Dashboard;
 use App\Livewire\Pwa\SalesOrderCreate;
 use App\Livewire\Pwa\StockBalance;
+use App\Livewire\Pwa\UnplannedVisitCreate;
 use App\Livewire\Pwa\VisitDetail;
 use App\Livewire\Pwa\VisitList;
 use App\Models\PaymentReceipt;
@@ -126,5 +127,5 @@ Route::middleware(['auth', 'role:SALESMAN'])->prefix('pwa')->name('pwa.pages.')-
     Route::get('/visits/{visitPlan}', VisitDetail::class)->name('visits.detail')->whereNumber('visitPlan');
     Route::get('/visits/{visitPlan}/order', SalesOrderCreate::class)->name('visits.order')->whereNumber('visitPlan');
     Route::get('/visits/{visitPlan}/collection', CollectionCreate::class)->name('visits.collection')->whereNumber('visitPlan');
-    Route::get('/visits/unplanned', fn () => redirect()->route('pwa.pages.visits'))->name('visits.unplanned');
+    Route::get('/visits/unplanned', UnplannedVisitCreate::class)->name('visits.unplanned');
 });
