@@ -38,6 +38,11 @@ class VisitPlan extends Model
         return $this->hasOne(CollectionTask::class, 'visit_plan_id');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(\App\Models\Payment::class, 'visit_plan_id');
+    }
+
     public function salesOrders()
     {
         return $this->hasMany(SalesOrder::class);

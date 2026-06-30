@@ -155,6 +155,6 @@ class PaymentTransferForm extends Component
 
     public function render()
     {
-        return view('livewire.admin.payment-transfer-form');
+        return view('livewire.admin.payment-transfer-form')->layout('components.layouts.app', ['title' => 'Payment Transfer']);
     }
 }

@@ -1,216 +1,321 @@
 <x-layouts.app heading="Approval">
-    <!-- Tab Navigation -->
-    <div class="card mb-3">
-        <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs">
-                @php
-                    $tabs = [
-                        'customer'   => ['label' => 'Customer Kredit', 'count' => $customerCredits->count()],
-                        'override'   => ['label' => 'Override Limit', 'count' => $creditOverrides->count()],
-                        'adjustment' => ['label' => 'Stock Adjustment', 'count' => $stockAdjustments->count()],
-                        'return'     => ['label' => 'Customer Return', 'count' => $customerReturns->count()],
-                        'writeoff'   => ['label' => 'Write-off', 'count' => $stockWriteoffs->count()],
-                    ];
-                @endphp
-                @foreach($tabs as $key => $t)
-                    <li class="nav-item">
-                        <a class="nav-link {{ $tab === $key ? 'active' : '' }}"
-                           href="/owner/approvals?tab={{ $key }}">
-                            {{ $t['label'] }}
-                            @if($t['count'] > 0)
-                                <span class="badge bg-warning ms-1">{{ $t['count'] }}</span>
-                            @endif
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
+
+    @php
+        $tabs = [
+            'customer'   => ['label' => 'Customer Kredit', 'count' => $customerCredits->count()],
+            'override'   => ['label' => 'Override Limit',  'count' => $creditOverrides->count()],
+            'adjustment' => ['label' => 'Stock Adjustment','count' => $stockAdjustments->count()],
+            'return'     => ['label' => 'Customer Return', 'count' => $customerReturns->count()],
+            'writeoff'   => ['label' => 'Write-off',       'count' => $stockWriteoffs->count()],
+        ];
+    @endphp
+
+    {{-- Tab navigation --}}
+    <div class="mb-5 flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1">
+        @foreach($tabs as $key => $t)
+        <a href="/owner/approvals?tab={{ $key }}"
+           class="flex flex-shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors
+                  {{ $tab === $key ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+            {{ $t['label'] }}
+            @if($t['count'] > 0)
+            <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold
+                         {{ $tab === $key ? 'bg-amber-400 text-slate-900' : 'bg-amber-100 text-amber-700' }}">
+                {{ $t['count'] }}
+            </span>
+            @endif
+        </a>
+        @endforeach
     </div>
 
-    {{-- Customer Kredit --}}
+    {{-- ── Customer Kredit ──────────────────────────────── --}}
     @if($tab === 'customer')
         @forelse($customerCredits as $c)
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h4 class="mb-1">{{ $c->customer_name }}</h4>
-                            <div class="text-muted small">
-                                Diajukan oleh {{ $c->requestedBy->name ?? '-' }} ·
-                                {{ $c->created_at->diffForHumans() }}
-                            </div>
-                        </div>
-                        <span class="badge bg-warning-lt">Pending</span>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-sm-4"><strong>Tipe:</strong> {{ $c->customer_type }}</div>
-                        <div class="col-sm-4"><strong>Limit diminta:</strong> Rp {{ number_format($c->credit_limit, 0, ',', '.') }}</div>
-                        <div class="col-sm-4"><strong>Term:</strong> {{ $c->credit_term_days }} hari</div>
-                    </div>
-                    <div class="mt-1 text-muted small">{{ $c->address }}</div>
+        <div class="mb-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-start justify-between px-5 py-4">
+                <div>
+                    <h3 class="font-semibold text-slate-900">{{ $c->customer_name }}</h3>
+                    <p class="mt-0.5 text-xs text-slate-400">
+                        Diajukan oleh <span class="font-medium text-slate-600">{{ $c->requestedBy->name ?? '-' }}</span>
+                        · {{ $c->created_at->diffForHumans() }}
+                    </p>
                 </div>
-                <div class="card-footer d-flex gap-2">
-                    <form method="POST" action="{{ route('owner.approvals.customer-credit.approve', $c) }}" class="d-flex gap-2 align-items-center flex-grow-1">
-                        @csrf
-                        <input type="number" name="credit_limit" class="form-control form-control-sm w-auto"
-                               value="{{ $c->credit_limit }}" placeholder="Limit disetujui">
-                        <button class="btn btn-success btn-sm">✓ Setujui</button>
-                    </form>
-                    <form method="POST" action="{{ route('owner.approvals.customer-credit.reject', $c) }}" class="d-flex gap-2 align-items-center">
-                        @csrf
-                        <input type="text" name="notes" class="form-control form-control-sm" placeholder="Alasan penolakan" required>
-                        <button class="btn btn-danger btn-sm">✗ Tolak</button>
-                    </form>
+                <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Pending</span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 border-t border-slate-50 px-5 py-3">
+                <div>
+                    <p class="text-xs text-slate-400">Tipe</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $c->customer_type }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Limit diminta</p>
+                    <p class="text-sm font-semibold text-slate-900">Rp {{ number_format($c->credit_limit, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Term</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $c->credit_term_days }} hari</p>
                 </div>
             </div>
+            <p class="border-t border-slate-50 px-5 py-2 text-xs text-slate-400">{{ $c->address }}</p>
+            <div class="flex gap-2 border-t border-slate-100 px-5 py-3">
+                <form method="POST" action="{{ route('owner.approvals.customer-credit.approve', $c) }}" class="flex flex-1 items-center gap-2">
+                    @csrf
+                    <input type="number" name="credit_limit"
+                           class="w-40 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
+                           value="{{ $c->credit_limit }}" placeholder="Limit disetujui">
+                    <button class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
+                        <x-heroicon-m-check class="h-4 w-4"/>
+                        Setujui
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('owner.approvals.customer-credit.reject', $c) }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="text" name="notes"
+                           class="w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-100"
+                           placeholder="Alasan penolakan" required>
+                    <button class="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors">
+                        <x-heroicon-m-x-mark class="h-4 w-4"/>
+                        Tolak
+                    </button>
+                </form>
+            </div>
+        </div>
         @empty
-            <div class="card"><div class="card-body text-center text-muted py-4">Tidak ada pengajuan customer kredit.</div></div>
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-400">
+            Tidak ada pengajuan customer kredit.
+        </div>
         @endforelse
     @endif
 
-    {{-- Credit Override --}}
+    {{-- ── Credit Override ──────────────────────────────── --}}
     @if($tab === 'override')
         @forelse($creditOverrides as $o)
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h4>{{ $o->customer->customer_name ?? '-' }}</h4>
-                        <span class="badge bg-warning-lt">Pending</span>
-                    </div>
-                    <div class="text-muted small mb-3">
-                        Diajukan oleh {{ $o->requestedBy->name ?? '-' }} · {{ $o->requested_at->diffForHumans() }}
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-3"><strong>SO:</strong> {{ $o->salesOrder->document_number ?? '-' }}</div>
-                        <div class="col-sm-3"><strong>Nilai Order:</strong> Rp {{ number_format($o->order_amount, 0, ',', '.') }}</div>
-                        <div class="col-sm-3"><strong>Outstanding:</strong> Rp {{ number_format($o->outstanding_at_request, 0, ',', '.') }}</div>
-                        <div class="col-sm-3"><strong>Limit saat ini:</strong> Rp {{ number_format($o->credit_limit_at_request, 0, ',', '.') }}</div>
-                    </div>
+        <div class="mb-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-start justify-between px-5 py-4">
+                <div>
+                    <h3 class="font-semibold text-slate-900">{{ $o->customer->customer_name ?? '-' }}</h3>
+                    <p class="mt-0.5 text-xs text-slate-400">
+                        Diajukan oleh <span class="font-medium text-slate-600">{{ $o->requestedBy->name ?? '-' }}</span>
+                        · {{ $o->requested_at->diffForHumans() }}
+                    </p>
                 </div>
-                <div class="card-footer d-flex gap-2">
-                    <form method="POST" action="{{ route('owner.approvals.credit-override.approve', $o) }}">
-                        @csrf
-                        <button class="btn btn-success btn-sm">✓ Setujui</button>
-                    </form>
-                    <form method="POST" action="{{ route('owner.approvals.credit-override.reject', $o) }}" class="d-flex gap-2">
-                        @csrf
-                        <input type="text" name="notes" class="form-control form-control-sm" placeholder="Alasan" required>
-                        <button class="btn btn-danger btn-sm">✗ Tolak</button>
-                    </form>
+                <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Pending</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4 border-t border-slate-50 px-5 py-3 md:grid-cols-4">
+                <div>
+                    <p class="text-xs text-slate-400">Sales Order</p>
+                    <p class="text-sm font-semibold text-slate-900 font-mono">{{ $o->salesOrder->document_number ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Nilai Order</p>
+                    <p class="text-sm font-semibold text-slate-900">Rp {{ number_format($o->order_amount, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Outstanding</p>
+                    <p class="text-sm font-semibold text-slate-900">Rp {{ number_format($o->outstanding_at_request, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Limit saat ini</p>
+                    <p class="text-sm font-semibold text-slate-900">Rp {{ number_format($o->credit_limit_at_request, 0, ',', '.') }}</p>
                 </div>
             </div>
+            <div class="flex gap-2 border-t border-slate-100 px-5 py-3">
+                <form method="POST" action="{{ route('owner.approvals.credit-override.approve', $o) }}">
+                    @csrf
+                    <button class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
+                        <x-heroicon-m-check class="h-4 w-4"/>
+                        Setujui
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('owner.approvals.credit-override.reject', $o) }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="text" name="notes"
+                           class="w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-100"
+                           placeholder="Alasan" required>
+                    <button class="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors">
+                        <x-heroicon-m-x-mark class="h-4 w-4"/>
+                        Tolak
+                    </button>
+                </form>
+            </div>
+        </div>
         @empty
-            <div class="card"><div class="card-body text-center text-muted py-4">Tidak ada override pending.</div></div>
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-400">
+            Tidak ada override pending.
+        </div>
         @endforelse
     @endif
 
-    {{-- Stock Adjustment --}}
+    {{-- ── Stock Adjustment ─────────────────────────────── --}}
     @if($tab === 'adjustment')
         @forelse($stockAdjustments as $a)
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h4>{{ $a->document_number }}</h4>
-                        <span class="badge bg-warning-lt">Pending</span>
-                    </div>
-                    <div class="text-muted small mb-3">
-                        Diajukan oleh {{ $a->createdBy->name ?? '-' }} · {{ $a->created_at->diffForHumans() }}
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-3"><strong>Produk:</strong> {{ $a->product->product_name ?? '-' }}</div>
-                        <div class="col-sm-3"><strong>Qty:</strong> {{ $a->qty }}</div>
-                        <div class="col-sm-3"><strong>Alasan:</strong> {{ $a->reason }}</div>
-                        <div class="col-sm-3"><strong>Sumber:</strong> {{ $a->source_context }}</div>
-                    </div>
-                    @if($a->notes)
-                        <div class="mt-1 text-muted small">{{ $a->notes }}</div>
-                    @endif
+        <div class="mb-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-start justify-between px-5 py-4">
+                <div>
+                    <h3 class="font-mono text-sm font-semibold text-slate-900">{{ $a->document_number }}</h3>
+                    <p class="mt-0.5 text-xs text-slate-400">
+                        Diajukan oleh <span class="font-medium text-slate-600">{{ $a->createdBy->name ?? '-' }}</span>
+                        · {{ $a->created_at->diffForHumans() }}
+                    </p>
                 </div>
-                <div class="card-footer d-flex gap-2">
-                    <form method="POST" action="{{ route('owner.approvals.stock-adjustment.approve', $a) }}">
-                        @csrf
-                        <button class="btn btn-success btn-sm">✓ Setujui</button>
-                    </form>
-                    <form method="POST" action="{{ route('owner.approvals.stock-adjustment.reject', $a) }}" class="d-flex gap-2">
-                        @csrf
-                        <input type="text" name="notes" class="form-control form-control-sm" placeholder="Alasan" required>
-                        <button class="btn btn-danger btn-sm">✗ Tolak</button>
-                    </form>
+                <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Pending</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4 border-t border-slate-50 px-5 py-3 md:grid-cols-4">
+                <div>
+                    <p class="text-xs text-slate-400">Produk</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $a->product->product_name ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Qty</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $a->qty }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Alasan</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $a->reason }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Sumber</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $a->source_context }}</p>
                 </div>
             </div>
+            @if($a->notes)
+            <p class="border-t border-slate-50 px-5 py-2 text-xs text-slate-400">{{ $a->notes }}</p>
+            @endif
+            <div class="flex gap-2 border-t border-slate-100 px-5 py-3">
+                <form method="POST" action="{{ route('owner.approvals.stock-adjustment.approve', $a) }}">
+                    @csrf
+                    <button class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
+                        <x-heroicon-m-check class="h-4 w-4"/>
+                        Setujui
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('owner.approvals.stock-adjustment.reject', $a) }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="text" name="notes"
+                           class="w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-100"
+                           placeholder="Alasan" required>
+                    <button class="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors">
+                        <x-heroicon-m-x-mark class="h-4 w-4"/>
+                        Tolak
+                    </button>
+                </form>
+            </div>
+        </div>
         @empty
-            <div class="card"><div class="card-body text-center text-muted py-4">Tidak ada stock adjustment pending.</div></div>
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-400">
+            Tidak ada stock adjustment pending.
+        </div>
         @endforelse
     @endif
 
-    {{-- Customer Return --}}
+    {{-- ── Customer Return ──────────────────────────────── --}}
     @if($tab === 'return')
         @forelse($customerReturns as $r)
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h4>{{ $r->document_number }}</h4>
-                        <span class="badge bg-warning-lt">Pending</span>
-                    </div>
-                    <div class="text-muted small mb-3">
-                        {{ $r->customer->customer_name ?? '-' }} ·
-                        Diajukan oleh {{ $r->createdBy->name ?? '-' }} · {{ $r->created_at->diffForHumans() }}
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-4"><strong>Invoice:</strong> {{ $r->invoice->invoice_number ?? '-' }}</div>
-                        <div class="col-sm-4"><strong>Total:</strong> Rp {{ number_format($r->total_amount, 0, ',', '.') }}</div>
-                        <div class="col-sm-4"><strong>Alasan:</strong> {{ $r->reason }}</div>
-                    </div>
+        <div class="mb-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-start justify-between px-5 py-4">
+                <div>
+                    <h3 class="font-mono text-sm font-semibold text-slate-900">{{ $r->document_number }}</h3>
+                    <p class="mt-0.5 text-xs text-slate-400">
+                        <span class="font-medium text-slate-600">{{ $r->customer->customer_name ?? '-' }}</span>
+                        · Diajukan oleh {{ $r->createdBy->name ?? '-' }}
+                        · {{ $r->created_at->diffForHumans() }}
+                    </p>
                 </div>
-                <div class="card-footer d-flex gap-2">
-                    <form method="POST" action="{{ route('owner.approvals.customer-return.approve', $r) }}">
-                        @csrf
-                        <button class="btn btn-success btn-sm">✓ Setujui</button>
-                    </form>
-                    <form method="POST" action="{{ route('owner.approvals.customer-return.reject', $r) }}" class="d-flex gap-2">
-                        @csrf
-                        <input type="text" name="notes" class="form-control form-control-sm" placeholder="Alasan" required>
-                        <button class="btn btn-danger btn-sm">✗ Tolak</button>
-                    </form>
+                <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Pending</span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 border-t border-slate-50 px-5 py-3">
+                <div>
+                    <p class="text-xs text-slate-400">Invoice</p>
+                    <p class="text-sm font-semibold text-slate-900 font-mono">{{ $r->invoice->invoice_number ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Total</p>
+                    <p class="text-sm font-semibold text-slate-900">Rp {{ number_format($r->total_amount, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Alasan</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $r->reason }}</p>
                 </div>
             </div>
+            <div class="flex gap-2 border-t border-slate-100 px-5 py-3">
+                <form method="POST" action="{{ route('owner.approvals.customer-return.approve', $r) }}">
+                    @csrf
+                    <button class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
+                        <x-heroicon-m-check class="h-4 w-4"/>
+                        Setujui
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('owner.approvals.customer-return.reject', $r) }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="text" name="notes"
+                           class="w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-100"
+                           placeholder="Alasan" required>
+                    <button class="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors">
+                        <x-heroicon-m-x-mark class="h-4 w-4"/>
+                        Tolak
+                    </button>
+                </form>
+            </div>
+        </div>
         @empty
-            <div class="card"><div class="card-body text-center text-muted py-4">Tidak ada customer return pending.</div></div>
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-400">
+            Tidak ada customer return pending.
+        </div>
         @endforelse
     @endif
 
-    {{-- Stock Write-off --}}
+    {{-- ── Stock Write-off ──────────────────────────────── --}}
     @if($tab === 'writeoff')
         @forelse($stockWriteoffs as $w)
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h4>{{ $w->document_number }}</h4>
-                        <span class="badge bg-warning-lt">Pending</span>
-                    </div>
-                    <div class="text-muted small mb-3">
-                        Diajukan oleh {{ $w->createdBy->name ?? '-' }} · {{ $w->created_at->diffForHumans() }}
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-4"><strong>Produk:</strong> {{ $w->product->product_name ?? '-' }}</div>
-                        <div class="col-sm-4"><strong>Qty:</strong> {{ $w->qty }}</div>
-                        <div class="col-sm-12 mt-1"><strong>Alasan:</strong> {{ $w->reason }}</div>
-                    </div>
+        <div class="mb-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-start justify-between px-5 py-4">
+                <div>
+                    <h3 class="font-mono text-sm font-semibold text-slate-900">{{ $w->document_number }}</h3>
+                    <p class="mt-0.5 text-xs text-slate-400">
+                        Diajukan oleh <span class="font-medium text-slate-600">{{ $w->createdBy->name ?? '-' }}</span>
+                        · {{ $w->created_at->diffForHumans() }}
+                    </p>
                 </div>
-                <div class="card-footer d-flex gap-2">
-                    <form method="POST" action="{{ route('owner.approvals.stock-writeoff.approve', $w) }}">
-                        @csrf
-                        <button class="btn btn-success btn-sm">✓ Setujui</button>
-                    </form>
-                    <form method="POST" action="{{ route('owner.approvals.stock-writeoff.reject', $w) }}" class="d-flex gap-2">
-                        @csrf
-                        <input type="text" name="notes" class="form-control form-control-sm" placeholder="Alasan" required>
-                        <button class="btn btn-danger btn-sm">✗ Tolak</button>
-                    </form>
+                <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Pending</span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 border-t border-slate-50 px-5 py-3">
+                <div>
+                    <p class="text-xs text-slate-400">Produk</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $w->product->product_name ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Qty</p>
+                    <p class="text-sm font-semibold text-slate-900">{{ $w->qty }}</p>
+                </div>
+                <div class="col-span-3">
+                    <p class="text-xs text-slate-400">Alasan</p>
+                    <p class="text-sm text-slate-900">{{ $w->reason }}</p>
                 </div>
             </div>
+            <div class="flex gap-2 border-t border-slate-100 px-5 py-3">
+                <form method="POST" action="{{ route('owner.approvals.stock-writeoff.approve', $w) }}">
+                    @csrf
+                    <button class="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
+                        <x-heroicon-m-check class="h-4 w-4"/>
+                        Setujui
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('owner.approvals.stock-writeoff.reject', $w) }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="text" name="notes"
+                           class="w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-100"
+                           placeholder="Alasan" required>
+                    <button class="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors">
+                        <x-heroicon-m-x-mark class="h-4 w-4"/>
+                        Tolak
+                    </button>
+                </form>
+            </div>
+        </div>
         @empty
-            <div class="card"><div class="card-body text-center text-muted py-4">Tidak ada stock write-off pending.</div></div>
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-400">
+            Tidak ada stock write-off pending.
+        </div>
         @endforelse
     @endif
+
 </x-layouts.app>

@@ -1,60 +1,67 @@
 <x-layouts.app heading="Laporan Stok">
-    <div class="card mb-3">
-        <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
-                <div class="col-sm-3">
-                    <label class="form-label">Holder</label>
-                    <select name="holder_type" class="form-select">
-                        <option value="">Semua</option>
-                        <option value="WAREHOUSE" {{ request('holder_type') === 'WAREHOUSE' ? 'selected' : '' }}>Gudang</option>
-                        <option value="SALESMAN" {{ request('holder_type') === 'SALESMAN' ? 'selected' : '' }}>Salesman</option>
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">Kondisi</label>
-                    <select name="condition" class="form-select">
-                        <option value="">Semua</option>
-                        <option value="GOOD" {{ request('condition') === 'GOOD' ? 'selected' : '' }}>GOOD</option>
-                        <option value="BAD" {{ request('condition') === 'BAD' ? 'selected' : '' }}>BAD</option>
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-            </form>
-        </div>
+
+    <div class="mb-5 rounded-xl border border-slate-200 bg-white p-5">
+        <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-700">Holder</label>
+                <select name="holder_type"
+                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                    <option value="">Semua</option>
+                    <option value="WAREHOUSE" {{ request('holder_type') === 'WAREHOUSE' ? 'selected' : '' }}>Gudang</option>
+                    <option value="SALESMAN" {{ request('holder_type') === 'SALESMAN' ? 'selected' : '' }}>Salesman</option>
+                </select>
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-700">Kondisi</label>
+                <select name="condition"
+                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                    <option value="">Semua</option>
+                    <option value="GOOD" {{ request('condition') === 'GOOD' ? 'selected' : '' }}>GOOD</option>
+                    <option value="BAD" {{ request('condition') === 'BAD' ? 'selected' : '' }}>BAD</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit"
+                        class="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800">
+                    Filter
+                </button>
+            </div>
+        </form>
     </div>
 
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-vcenter card-table">
+    <div class="rounded-xl border border-slate-200 bg-white">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th class="text-center">GOOD (Gudang)</th>
-                        <th class="text-center">BAD (Gudang)</th>
-                        <th class="text-center">GOOD (Salesman)</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Produk</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">GOOD (Gudang)</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">BAD (Gudang)</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">GOOD (Salesman)</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-50">
                     @forelse($balances as $productId => $rows)
-                        @php
-                            $product = $rows->first()->product;
-                            $wGood = $rows->where('holder_type','WAREHOUSE')->where('condition','GOOD')->sum('qty');
-                            $wBad  = $rows->where('holder_type','WAREHOUSE')->where('condition','BAD')->sum('qty');
-                            $sGood = $rows->where('holder_type','SALESMAN')->where('condition','GOOD')->sum('qty');
-                        @endphp
-                        <tr>
-                            <td>{{ $product->product_name ?? '-' }}</td>
-                            <td class="text-center text-success">{{ number_format($wGood, 0, ',', '.') }}</td>
-                            <td class="text-center {{ $wBad > 0 ? 'text-danger' : 'text-muted' }}">{{ number_format($wBad, 0, ',', '.') }}</td>
-                            <td class="text-center">{{ number_format($sGood, 0, ',', '.') }}</td>
-                        </tr>
+                    @php
+                        $product = $rows->first()->product;
+                        $wGood = $rows->where('holder_type', 'WAREHOUSE')->where('condition', 'GOOD')->sum('qty');
+                        $wBad  = $rows->where('holder_type', 'WAREHOUSE')->where('condition', 'BAD')->sum('qty');
+                        $sGood = $rows->where('holder_type', 'SALESMAN')->where('condition', 'GOOD')->sum('qty');
+                    @endphp
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-5 py-3 font-semibold text-slate-900">{{ $product->product_name ?? '-' }}</td>
+                        <td class="px-4 py-3 text-center font-semibold text-emerald-600">{{ number_format($wGood, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-center font-semibold {{ $wBad > 0 ? 'text-red-500' : 'text-slate-400' }}">{{ number_format($wBad, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-center font-semibold text-slate-700">{{ number_format($sGood, 0, ',', '.') }}</td>
+                    </tr>
                     @empty
-                        <tr><td colspan="4" class="text-center text-muted py-4">Belum ada data stok.</td></tr>
+                    <tr>
+                        <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada data stok.</td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+
 </x-layouts.app>

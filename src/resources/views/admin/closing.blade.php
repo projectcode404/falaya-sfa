@@ -1,77 +1,98 @@
 <x-layouts.app heading="Tutup Hari Operasional">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        Closing — {{ $today->translatedFormat('l, d F Y') }}
-                    </h3>
-                </div>
-                <div class="card-body">
-                    @if($result['can_close'])
-                        <div class="alert alert-success">
-                            <div class="d-flex align-items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="20 6 9 17 4 12"/></svg>
-                                <div>
-                                    <strong>Semua transaksi sudah selesai.</strong>
-                                    Siap menutup hari operasional.
-                                </div>
-                            </div>
+
+    <div class="mx-auto max-w-2xl">
+
+        <div class="rounded-xl border border-slate-200 bg-white">
+            <div class="border-b border-slate-100 px-6 py-4">
+                <h2 class="text-sm font-semibold text-slate-900">
+                    Closing — {{ $today->translatedFormat('l, d F Y') }}
+                </h2>
+            </div>
+
+            <div class="px-6 py-5">
+
+                @if($result['can_close'])
+
+                    {{-- Siap closing --}}
+                    <div class="mb-5 flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+                        <x-heroicon-o-check-circle class="h-5 w-5 flex-shrink-0 text-emerald-500 mt-0.5"/>
+                        <div>
+                            <p class="text-sm font-semibold text-emerald-800">Semua transaksi sudah selesai.</p>
+                            <p class="text-xs text-emerald-700 mt-0.5">Siap menutup hari operasional.</p>
                         </div>
+                    </div>
 
-                        @if(isset($result['summary']))
-                            <div class="mb-3 text-muted small">
-                                @foreach($result['summary'] as $line)
-                                    <div>· {{ $line }}</div>
-                                @endforeach
-                            </div>
-                        @endif
-
-                        <form method="POST" action="{{ route('admin.closing.execute') }}"
-                              onsubmit="return confirm('Tutup hari operasional {{ $today->toDateString() }}? Tindakan ini tidak dapat dibatalkan.')">
-                            @csrf
-                            <button type="submit" class="btn btn-danger w-100">
-                                Tutup Hari Operasional Sekarang
-                            </button>
-                        </form>
-                    @else
-                        <div class="alert alert-danger">
-                            <strong>❌ Belum bisa ditutup.</strong>
-                            {{ count($result['blockers']) }} hal perlu diselesaikan:
-                        </div>
-
-                        <div class="list-group mb-4">
-                            @foreach($result['blockers'] as $blocker)
-                                <div class="list-group-item list-group-item-danger">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="fw-bold">🔴 {{ $blocker['label'] }}</div>
-                                            @if(isset($blocker['detail']))
-                                                <div class="small text-muted mt-1">{{ $blocker['detail'] }}</div>
-                                            @endif
-                                        </div>
-                                        @if(isset($blocker['url']))
-                                            <a href="{{ $blocker['url'] }}" class="btn btn-sm btn-outline-danger ms-3">
-                                                Selesaikan →
-                                            </a>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div class="alert alert-info small">
-                            💡 Pengajuan approval (Stock Adjustment, Customer Return, dll) tidak menghalangi penutupan hari.
-                        </div>
-
-                        <form method="GET" action="{{ route('admin.closing') }}">
-                            <button type="submit" class="btn btn-outline-primary w-100">
-                                🔄 Cek Ulang Status
-                            </button>
-                        </form>
+                    @if(isset($result['summary']))
+                    <ul class="mb-5 space-y-1">
+                        @foreach($result['summary'] as $line)
+                        <li class="flex items-center gap-2 text-xs text-slate-500">
+                            <span class="h-1 w-1 rounded-full bg-slate-400"></span>
+                            {{ $line }}
+                        </li>
+                        @endforeach
+                    </ul>
                     @endif
-                </div>
+
+                    <form method="POST" action="{{ route('admin.closing.execute') }}"
+                          onsubmit="return confirm('Tutup hari operasional {{ $today->toDateString() }}? Tindakan ini tidak dapat dibatalkan.')">
+                        @csrf
+                        <button type="submit"
+                            class="w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800">
+                            Tutup Hari Operasional Sekarang
+                        </button>
+                    </form>
+
+                @else
+
+                    {{-- Ada blocker --}}
+                    <div class="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                        <x-heroicon-o-x-circle class="h-5 w-5 flex-shrink-0 text-red-500 mt-0.5"/>
+                        <div>
+                            <p class="text-sm font-semibold text-red-800">Belum bisa ditutup.</p>
+                            <p class="text-xs text-red-700 mt-0.5">{{ count($result['blockers']) }} hal perlu diselesaikan terlebih dahulu.</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-5 space-y-2">
+                        @foreach($result['blockers'] as $blocker)
+                        <div class="flex items-start justify-between gap-4 rounded-lg border border-red-100 bg-red-50/50 px-4 py-3">
+                            <div class="flex items-start gap-3">
+                                <x-heroicon-o-exclamation-circle class="h-4 w-4 flex-shrink-0 text-red-500 mt-0.5"/>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">{{ $blocker['label'] }}</p>
+                                    @if(isset($blocker['detail']))
+                                    <p class="mt-0.5 text-xs text-slate-500">{{ $blocker['detail'] }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                            @if(isset($blocker['url']))
+                            <a href="{{ $blocker['url'] }}"
+                               class="flex-shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
+                                Selesaikan →
+                            </a>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <div class="mb-5 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+                        <x-heroicon-o-information-circle class="h-4 w-4 flex-shrink-0 text-blue-500 mt-0.5"/>
+                        <p class="text-xs text-blue-700">
+                            Pengajuan approval (Stock Adjustment, Customer Return, dll) tidak menghalangi penutupan hari.
+                        </p>
+                    </div>
+
+                    <a href="{{ route('admin.closing') }}"
+                       class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
+                        <x-heroicon-o-arrow-path class="h-4 w-4"/>
+                        Cek Ulang Status
+                    </a>
+
+                @endif
+
             </div>
         </div>
+
     </div>
+
 </x-layouts.app>

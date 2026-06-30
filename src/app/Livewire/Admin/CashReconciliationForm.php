@@ -120,6 +120,6 @@ class CashReconciliationForm extends Component
 
     public function render()
     {
-        return view('livewire.admin.cash-reconciliation-form');
+        return view('livewire.admin.cash-reconciliation-form')->layout('components.layouts.app', ['title' => 'Cash Reconciliation']);
     }
 }

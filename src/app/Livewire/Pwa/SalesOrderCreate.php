@@ -62,7 +62,7 @@ class SalesOrderCreate extends Component
     public function nextStep(): void
     {
         $total = collect($this->items)->sum(fn ($i) => $i['qty'] * $i['unit_price']);
-        if (collect($this->items)->sum(fn ($i) => $i['qty'] * $i['unit_price']) > 0) {
+        if ($total > 0) {
             $this->step = 2;
         }
     }
@@ -144,16 +144,19 @@ class SalesOrderCreate extends Component
                 $itemsToSend,
                 $this->receiver_name ?: null,
             );
-
             $salesOrder = $postAction->execute($salesOrder);
-
             $this->submitSuccess = "Order {$salesOrder->document_number} berhasil!";
             $this->dispatch('order-success');
-
             $this->redirect(route('pwa.pages.visits.detail', $this->visitPlan->id), navigate: false);
 
             return;
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), 'uq_one_active_so_per_visit')) {
+                $this->submitError = 'Kunjungan ini sudah punya pesanan aktif. Muat ulang halaman untuk melihat status terkini.';
 
+                return;
+            }
+            $this->submitError = 'Terjadi kesalahan sistem. Coba lagi atau hubungi Admin.';
         } catch (\RuntimeException $e) {
             if ($salesOrder && str_contains($e->getMessage(), 'credit limit')) {
                 $overrideAction->execute($salesOrder->fresh());

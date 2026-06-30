@@ -3,7 +3,6 @@
          PWA Visit Detail — Falaya SFA
          Livewire + Alpine.js for GPS check-in flow
          ============================================================ --}}
-
     <style>
         .falaya-card { border-radius: 12px; border: 1px solid #e6e7e9; margin-bottom: 12px; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
         .falaya-card--danger  { border-color: #d63939; background: #fff5f5; }
@@ -22,19 +21,23 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .invoice-mini { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
         .invoice-mini:last-child { border-bottom: none; }
+        .mini-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
+        .mini-row:last-child { border-bottom: none; }
         .credit-bar { height: 8px; border-radius: 4px; background: #e6e7e9; overflow: hidden; margin-top: 6px; }
         .credit-bar__fill { height: 100%; border-radius: 4px; background: #206bc4; transition: width 0.3s; }
-        .small-link { font-size: 0.82rem; color: #616876; text-decoration: none; text-align: center; display: block; padding: 6px; }
+        .small-link { font-size: 0.82rem; color: #616876; text-decoration: none; text-align: center; display: block; padding: 6px; background: none; border: none; }
         .small-link:active { color: #374151; }
         .back-btn { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #616876; text-decoration: none; padding: 12px 16px 4px; }
+        .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .confirm-modal { background: white; border-radius: 14px; padding: 20px; width: 100%; max-width: 320px; }
+        .confirm-modal__title { font-weight: 700; font-size: 1rem; color: #1a1a2e; margin-bottom: 8px; }
+        .confirm-modal__body { font-size: 0.88rem; color: #616876; margin-bottom: 16px; }
     </style>
 
-    {{-- ── Back nav ─────────────────────────────────────────────────── --}}
     <a href="{{ route('pwa.pages.visits') }}" class="back-btn">
         ‹ Daftar Kunjungan
     </a>
 
-    {{-- ── Outlet Header Card ──────────────────────────────────────── --}}
     <div class="px-3 pt-1">
         <div class="falaya-card p-3 mb-3">
             <div class="d-flex justify-content-between align-items-start mb-1">
@@ -48,7 +51,6 @@
         </div>
     </div>
 
-    {{-- ── Credit Info (only for CREDIT customers) ─────────────────── --}}
     @if ($visit->customer->customer_type === 'CREDIT' && $visit->customer->credit_limit)
     @php
         $used = $customerOutstanding ?? 0;
@@ -77,22 +79,15 @@
         </div>
     </div>
     @endif
-
-    {{-- ── Main State Machine — Alpine.js ──────────────────────────── --}}
-    @php
-        $isCheckedIn  = in_array($visit->status, ['IN_PROGRESS', 'COMPLETED', 'NO_ORDER', 'OUTLET_CLOSED']);
-        $isDone       = in_array($visit->status, ['COMPLETED', 'NO_ORDER', 'OUTLET_CLOSED', 'SKIPPED']);
-    @endphp
-
     <div
         class="px-3"
         x-data="{
             gpsState: '{{ $isCheckedIn ? 'done' : 'idle' }}',
-            {{-- idle | loading | success | outside_radius | unavailable | done --}}
             gpsInfo: null,
             photoTaken: false,
             showPhotoCapture: false,
-
+            showOutletClosedConfirm: false,
+            showCheckoutConfirm: false,
             async startCheckin() {
                 this.gpsState = 'loading';
                 const timeout = new Promise(resolve => setTimeout(() => resolve({ unavailable: true }), 12000));
@@ -104,17 +99,14 @@
                     );
                 });
                 const result = await Promise.race([gpsPromise, timeout]);
-
                 if (result.unavailable) {
                     this.gpsState = 'unavailable';
                     this.gpsInfo  = null;
                     return;
                 }
-
                 this.gpsInfo = result;
                 const dist = this.haversine(result.lat, result.lng, {{ $visit->customer->latitude ?? 0 }}, {{ $visit->customer->longitude ?? 0 }});
                 const radius = {{ $visit->customer->radius_tolerance_meter ?? $defaultRadius ?? 100 }};
-
                 if (dist > radius) {
                     this.gpsState = 'outside_radius';
                     this.gpsInfo  = { ...result, distance: Math.round(dist), radius };
@@ -124,7 +116,6 @@
                     this.showPhotoCapture = true;
                 }
             },
-
             haversine(lat1, lon1, lat2, lon2) {
                 const R = 6371000;
                 const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -132,19 +123,13 @@
                 const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
                 return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             },
-
             async confirmCheckin() {
                 const data = this.gpsInfo ?? { unavailable: true };
-                {{-- delegate to Livewire, tunggu response server sebelum
-                     update UI state -- tanpa await, gpsState bisa nyangkut
-                     di state lama walau server sudah sukses ubah status --}}
                 await @this.call('checkin', data);
                 this.gpsState = 'done';
             }
         }"
     >
-
-        {{-- ── STATE: idle (not yet checked in) ──────────────────── --}}
         <template x-if="gpsState === 'idle'">
             <div>
                 <button @click="startCheckin()" class="action-btn-primary mb-3">
@@ -153,7 +138,6 @@
             </div>
         </template>
 
-        {{-- ── STATE: loading GPS ───────────────────────────────── --}}
         <template x-if="gpsState === 'loading'">
             <div class="falaya-card falaya-card--info p-3 mb-3">
                 <div class="gps-loading">
@@ -164,7 +148,6 @@
             </div>
         </template>
 
-        {{-- ── STATE: GPS success — photo step ─────────────────── --}}
         <template x-if="gpsState === 'success'">
             <div>
                 <div class="falaya-card falaya-card--success p-3 mb-2">
@@ -175,8 +158,6 @@
                     <div style="font-size:0.85rem;color:#166534" x-text="'Jarak ' + gpsInfo.distance + 'm dari outlet'"></div>
                     <div style="font-size:0.78rem;color:#4ade80;margin-top:2px" x-show="gpsInfo.acc <= 20">Akurasi GPS sangat baik</div>
                 </div>
-
-                {{-- Photo capture --}}
                 <div class="falaya-card p-3 mb-3" x-show="!photoTaken">
                     <div style="font-size:0.85rem;color:#616876;margin-bottom:10px">📷 <strong>Ambil foto outlet</strong> sebagai bukti kunjungan</div>
                     <label style="display:block;cursor:pointer">
@@ -190,7 +171,6 @@
                         </div>
                     </label>
                 </div>
-
                 <div class="falaya-card falaya-card--success p-3 mb-3" x-show="photoTaken">
                     <div class="d-flex align-items-center gap-2">
                         <span>📸</span>
@@ -200,7 +180,6 @@
                         </div>
                     </div>
                 </div>
-
                 <button
                     class="action-btn-primary mb-2"
                     @click="confirmCheckin()"
@@ -215,7 +194,6 @@
             </div>
         </template>
 
-        {{-- ── STATE: outside radius — BLOCKED ─────────────────── --}}
         <template x-if="gpsState === 'outside_radius'">
             <div>
                 <div class="falaya-card falaya-card--danger p-3 mb-3">
@@ -234,7 +212,6 @@
             </div>
         </template>
 
-        {{-- ── STATE: GPS unavailable — allowed with flag ──────── --}}
         <template x-if="gpsState === 'unavailable'">
             <div>
                 <div class="falaya-card falaya-card--warning p-3 mb-3">
@@ -254,11 +231,14 @@
                 </button>
             </div>
         </template>
-
-        {{-- ── STATE: done / checked in ──────────────────────────── --}}
         @if ($isCheckedIn && !$isDone)
         <div>
-            {{-- Outstanding warning --}}
+            @if ($actionError)
+            <div class="falaya-card falaya-card--danger p-3 mb-3">
+                <div style="font-size:0.85rem;color:#991b1b">⚠️ {{ $actionError }}</div>
+            </div>
+            @endif
+
             @if ($outstandingTotal > 0)
             <div class="falaya-card falaya-card--warning p-3 mb-3">
                 <div style="font-size:0.75rem;font-weight:600;color:#92400e;margin-bottom:8px">⚠️ TAGIHAN OUTSTANDING</div>
@@ -276,35 +256,56 @@
                     @endif
                 </div>
                 @endforeach
-
-                <a href="{{ route('pwa.pages.visits.collection', $visit->id) }}"
-                   class="d-block w-100 mt-3 py-2 text-center fw-600"
+                <a href="{{ route('pwa.pages.visits.collection', $visit->id) }}" class="d-block w-100 mt-3 py-2 text-center fw-600"
                    style="background:#f59f00;color:white;border-radius:8px;text-decoration:none;font-weight:600;min-height:44px;line-height:2.5">
                     💰 Tagih Sekarang
                 </a>
             </div>
             @endif
 
-            {{-- Primary actions --}}
+            @if ($visitOrders->isNotEmpty() || $visitPayments->isNotEmpty())
+            <div class="falaya-card p-3 mb-3">
+                <div style="font-size:0.75rem;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Riwayat Kunjungan Ini</div>
+                @foreach ($visitOrders as $so)
+                <div class="mini-row">
+                    <div>
+                        <div style="font-weight:600;color:#1a1a2e">🛒 {{ $so->document_number }}</div>
+                        <div style="font-size:0.75rem;color:#9ca3af">{{ $so->payment_type }} · {{ $so->status }}</div>
+                    </div>
+                    <div style="font-weight:600;color:#1a1a2e">Rp {{ number_format($so->total_amount, 0, ',', '.') }}</div>
+                </div>
+                @endforeach
+                @foreach ($visitPayments as $pay)
+                <div class="mini-row">
+                    <div>
+                        <div style="font-weight:600;color:#1a1a2e">💰 {{ $pay->payment_number }}</div>
+                        <div style="font-size:0.75rem;color:#9ca3af">{{ $pay->payment_method }} · {{ $pay->status }}</div>
+                    </div>
+                    <div style="font-weight:600;color:#1a1a2e">Rp {{ number_format($pay->total_amount, 0, ',', '.') }}</div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
+            @if (! $hasPostedOrder)
             <a href="{{ route('pwa.pages.visits.order', $visit->id) }}" class="action-btn-primary mb-2 d-flex" style="text-decoration:none">
                 🛒 Buat Pesanan
             </a>
+            @endif
             <a href="{{ route('pwa.pages.visits.collection', $visit->id) }}" class="action-btn-outline mb-3 d-flex" style="text-decoration:none">
                 💰 Catat Pembayaran
             </a>
 
-            {{-- Secondary actions --}}
             <div class="d-flex justify-content-around">
-                <button wire:click="markOutletClosed" class="small-link">🔒 Outlet Tutup</button>
+                @if (! $hasPostedOrder && $visit->status === 'PLANNED')
+                <button type="button" class="small-link" @click="showOutletClosedConfirm = true">🔒 Outlet Tutup</button>
                 <span style="color:#e6e7e9">|</span>
-                <button wire:click="markNoOrder" class="small-link">👋 Tanpa Order</button>
-                <span style="color:#e6e7e9">|</span>
-                <button wire:click="checkout" class="small-link" style="color:#206bc4">✅ Check-out</button>
+                @endif
+                <button type="button" class="small-link" style="color:#206bc4" @click="showCheckoutConfirm = true">✅ Check-out</button>
             </div>
         </div>
         @endif
 
-        {{-- ── Done state ──────────────────────────────────────────── --}}
         @if ($isDone)
         <div class="falaya-card falaya-card--success p-3 mb-3">
             <div class="text-center">
@@ -322,7 +323,27 @@
         </a>
         @endif
 
-    </div>
+        <div class="confirm-overlay" x-show="showOutletClosedConfirm" x-cloak @click.self="showOutletClosedConfirm = false">
+            <div class="confirm-modal">
+                <div class="confirm-modal__title">🔒 Tandai Outlet Tutup?</div>
+                <div class="confirm-modal__body">Kunjungan ini akan ditandai selesai tanpa check-in. Pastikan outlet benar-benar tidak buka.</div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="action-btn-outline" style="min-height:44px" @click="showOutletClosedConfirm = false">Batal</button>
+                    <button type="button" class="action-btn-danger" style="min-height:44px" wire:click="markOutletClosed" @click="showOutletClosedConfirm = false">Ya, Tutup</button>
+                </div>
+            </div>
+        </div>
 
+        <div class="confirm-overlay" x-show="showCheckoutConfirm" x-cloak @click.self="showCheckoutConfirm = false">
+            <div class="confirm-modal">
+                <div class="confirm-modal__title">✅ Selesaikan Kunjungan?</div>
+                <div class="confirm-modal__body">Pastikan semua pesanan dan pembayaran di outlet ini sudah tercatat sebelum check-out.</div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="action-btn-outline" style="min-height:44px" @click="showCheckoutConfirm = false">Batal</button>
+                    <button type="button" class="action-btn-primary" style="min-height:44px" wire:click="checkout" @click="showCheckoutConfirm = false">Ya, Check-out</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div style="height:80px"></div>
 </div>

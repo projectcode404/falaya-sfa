@@ -1,167 +1,330 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" class="h-full bg-slate-100">
 <head>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>{{ $title ?? 'Falaya SFA' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="antialiased">
-<div class="wrapper">
-    <!-- Navbar -->
-    <header class="navbar navbar-expand-md navbar-light d-print-none">
-        <div class="container-xl">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
-                <span class="navbar-toggler-icon"></span>
+<body class="h-full font-sans antialiased" x-data="{ sidebarOpen: false }">
+
+<div class="flex h-full">
+
+    {{-- ── SIDEBAR OVERLAY (mobile) ──────────────────────── --}}
+    <div
+        x-show="sidebarOpen"
+        x-transition:enter="transition-opacity ease-linear duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-linear duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-40 bg-slate-900/60 md:hidden"
+        @click="sidebarOpen = false"
+        style="display:none"
+    ></div>
+
+    {{-- ── SIDEBAR ────────────────────────────────────────── --}}
+    <aside
+        class="fixed inset-y-0 left-0 z-50 flex w-56 flex-col bg-slate-900 transition-transform duration-200 ease-in-out md:translate-x-0"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+    >
+        {{-- Brand --}}
+        <div class="flex h-14 items-center gap-3 border-b border-slate-800 px-4 flex-shrink-0">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-sm font-bold text-slate-900 flex-shrink-0">F</div>
+            <div>
+                <div class="text-sm font-bold leading-tight text-white">Falaya SFA</div>
+                <div class="text-[10px] font-semibold uppercase tracking-widest text-amber-400">
+                    {{ Auth::user()->role ?? Auth::user()->getRoleNames()->first() }}
+                </div>
+            </div>
+        </div>
+
+        {{-- Nav --}}
+        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+
+            @if(Auth::user()->hasRole('OWNER'))
+            <div>
+                <p class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Utama</p>
+                <ul class="space-y-0.5">
+                    <li>
+                        <a href="/owner/dashboard"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('owner/dashboard') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-squares-2x2 class="h-4 w-4 flex-shrink-0"/>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/owner/approvals"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('owner/approvals*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-clipboard-document-check class="h-4 w-4 flex-shrink-0"/>
+                            Approval
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <p class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Laporan</p>
+                <ul class="space-y-0.5">
+                    <li>
+                        <a href="/reports/sales"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('reports/sales') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-chart-bar class="h-4 w-4 flex-shrink-0"/>
+                            Penjualan
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/reports/stock"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('reports/stock') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-cube class="h-4 w-4 flex-shrink-0"/>
+                            Stok
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/reports/ar"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('reports/ar') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-banknotes class="h-4 w-4 flex-shrink-0"/>
+                            AR Outstanding
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/reports/visits"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('reports/visits') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-map-pin class="h-4 w-4 flex-shrink-0"/>
+                            Kunjungan
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/reports/collection-risk"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('reports/collection-risk') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-exclamation-triangle class="h-4 w-4 flex-shrink-0"/>
+                            Collection Risk
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/reports/bad-stock"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('reports/bad-stock') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-shield-exclamation class="h-4 w-4 flex-shrink-0"/>
+                            Bad Stock
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <p class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Sistem</p>
+                <ul class="space-y-0.5">
+                    <li>
+                        <a href="/settings"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('settings*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-cog-6-tooth class="h-4 w-4 flex-shrink-0"/>
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            @endif
+
+            @if(Auth::user()->hasRole('ADMIN'))
+            <div>
+                <p class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Operasional</p>
+                <ul class="space-y-0.5">
+                    <li>
+                        <a href="/admin/dashboard"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/dashboard') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-squares-2x2 class="h-4 w-4 flex-shrink-0"/>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/stock-loading"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/stock-loading*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-arrow-up-tray class="h-4 w-4 flex-shrink-0"/>
+                            Stock Loading
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/stock-unloading"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/stock-unloading*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-arrow-down-tray class="h-4 w-4 flex-shrink-0"/>
+                            Stock Unloading
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/cash-reconciliation"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/cash-reconciliation*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-arrows-right-left class="h-4 w-4 flex-shrink-0"/>
+                            Rekonsiliasi
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/payment-transfer"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/payment-transfer*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-credit-card class="h-4 w-4 flex-shrink-0"/>
+                            Payment Transfer
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/closing"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/closing*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-flag class="h-4 w-4 flex-shrink-0"/>
+                            Tutup Hari
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <p class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Master Data</p>
+                <ul class="space-y-0.5">
+                    <li>
+                        <a href="/admin/products"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/products*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-tag class="h-4 w-4 flex-shrink-0"/>
+                            Produk
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/customers"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/customers*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-building-storefront class="h-4 w-4 flex-shrink-0"/>
+                            Customer
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/areas"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/areas*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-map class="h-4 w-4 flex-shrink-0"/>
+                            Area
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/users"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/users*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-users class="h-4 w-4 flex-shrink-0"/>
+                            User
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/visit-schedules"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('admin/visit-schedules*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-calendar-days class="h-4 w-4 flex-shrink-0"/>
+                            Jadwal Kunjungan
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <p class="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Laporan</p>
+                <ul class="space-y-0.5">
+                    <li>
+                        <a href="/reports/sales"
+                           class="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors
+                                  {{ request()->is('reports*') ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                            <x-heroicon-o-chart-bar class="h-4 w-4 flex-shrink-0"/>
+                            Laporan
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            @endif
+
+        </nav>
+
+        {{-- User footer --}}
+        <div class="border-t border-slate-800 p-3">
+            <div class="flex items-center gap-2.5 rounded-lg px-2 py-2">
+                <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-slate-300">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="truncate text-sm font-semibold text-white">{{ Auth::user()->name }}</div>
+                    <div class="truncate text-xs text-slate-500">{{ Auth::user()->email }}</div>
+                </div>
+                <form method="POST" action="/logout">
+                    @csrf
+                    <button type="submit" class="text-slate-500 hover:text-red-400 transition-colors" title="Keluar">
+                        <x-heroicon-o-arrow-right-on-rectangle class="h-4 w-4"/>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    {{-- ── MAIN ────────────────────────────────────────────── --}}
+    <div class="flex min-h-full flex-1 flex-col md:pl-56">
+
+        {{-- Topbar --}}
+        <header class="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-4 md:px-6">
+            {{-- Mobile hamburger --}}
+            <button @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-slate-700 md:hidden">
+                <x-heroicon-o-bars-3 class="h-5 w-5"/>
             </button>
-            <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-                <span class="fw-bold text-primary">Falaya SFA</span>
-            </h1>
-            <div class="navbar-nav flex-row order-md-last">
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
-                        <div class="d-none d-xl-block ps-2">
-                            <div>{{ Auth::user()->name }}</div>
-                            <div class="mt-1 small text-muted">{{ Auth::user()->getRoleNames()->first() }}</div>
-                        </div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <form method="POST" action="/logout">
-                            @csrf
-                            <button type="submit" class="dropdown-item text-danger">Keluar</button>
-                        </form>
-                    </div>
-                </div>
+
+            <div>
+                <h1 class="text-sm font-semibold text-slate-900">{{ $heading ?? ($title ?? '') }}</h1>
             </div>
-        </div>
-    </header>
 
-    <!-- Sidebar -->
-    <div class="navbar-expand-md">
-        <div class="collapse navbar-collapse" id="navbar-menu">
-            <div class="navbar navbar-light">
-                <div class="container-xl">
-                    <ul class="navbar-nav">
-
-                        @if(Auth::user()->hasRole('OWNER'))
-                            <li class="nav-item {{ request()->is('owner/dashboard') ? 'active' : '' }}">
-                                <a class="nav-link" href="/owner/dashboard">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Dashboard</span>
-                                </a>
-                            </li>
-                            <li class="nav-item {{ request()->is('owner/approvals*') ? 'active' : '' }}">
-                                <a class="nav-link" href="/owner/approvals">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="9 11 12 14 20 6"/><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Approval</span>
-                                </a>
-                            </li>
-                            <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
-                                <a class="nav-link" href="/reports/sales">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Laporan</span>
-                                </a>
-                            </li>
-                            <li class="nav-item {{ request()->is('settings*') ? 'active' : '' }}">
-                                <a class="nav-link" href="/settings">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Settings</span>
-                                </a>
-                            </li>
-                        @endif
-
-                        @if(Auth::user()->hasRole('ADMIN'))
-                            <li class="nav-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
-                                <a class="nav-link" href="/admin/dashboard">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Dashboard</span>
-                                </a>
-                            </li>
-                            <li class="nav-item {{ request()->is('admin/closing*') ? 'active' : '' }}">
-                                <a class="nav-link" href="/admin/closing">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="4" y="5" width="16" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="4" y1="11" x2="20" y2="11"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Tutup Hari</span>
-                                </a>
-                            </li>
-
-                            {{-- Inventory dropdown --}}
-                            <li class="nav-item dropdown {{ request()->is('admin/stock-loading*','admin/stock-unloading*','admin/cash-reconciliation*','admin/payment-transfer*') ? 'active' : '' }}">
-                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/><path d="M12 12l8 -4.5"/><path d="M12 12l0 9"/><path d="M12 12l-8 -4.5"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Inventory</span>
-                                </a>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item {{ request()->is('admin/stock-loading*') ? 'active' : '' }}" href="/admin/stock-loading">Stock Loading</a>
-                                    <a class="dropdown-item {{ request()->is('admin/stock-unloading*') ? 'active' : '' }}" href="/admin/stock-unloading">Stock Unloading</a>
-                                    <a class="dropdown-item {{ request()->is('admin/cash-reconciliation*') ? 'active' : '' }}" href="/admin/cash-reconciliation">Cash Reconciliation</a>
-                                    <a class="dropdown-item {{ request()->is('admin/payment-transfer*') ? 'active' : '' }}" href="/admin/payment-transfer">Payment Transfer</a>
-                                </div>
-                            </li>
-
-                            {{-- Master Data dropdown --}}
-                            <li class="nav-item dropdown {{ request()->is('admin/products*','admin/areas*','admin/customers*','admin/users*','admin/visit-schedules*') ? 'active' : '' }}">
-                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Master Data</span>
-                                </a>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item {{ request()->is('admin/products*') ? 'active' : '' }}"
-                                        href="/admin/products">Produk</a>
-                                    <a class="dropdown-item {{ request()->is('admin/areas*') ? 'active' : '' }}"
-                                        href="/admin/areas">Area</a>
-                                    <a class="dropdown-item {{ request()->is('admin/customers*') ? 'active' : '' }}"
-                                        href="/admin/customers">Customer</a>
-                                    <a class="dropdown-item {{ request()->is('admin/users*') ? 'active' : '' }}"
-                                        href="/admin/users">User</a>
-                                    <a class="dropdown-item {{ request()->is('admin/visit-schedules*') ? 'active' : '' }}"
-                                        href="/admin/visit-schedules">Jadwal Kunjungan</a>
-                                </div>
-                            </li>
-
-                            <li class="nav-item {{ request()->is('reports*') ? 'active' : '' }}">
-                                <a class="nav-link" href="/reports/sales">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                                    </span>
-                                    <span class="nav-link-title">Laporan</span>
-                                </a>
-                            </li>
-                        @endif
-
-                    </ul>
+            <div class="ml-auto flex items-center gap-3">
+                {{-- Hari operasional chip --}}
+                @php
+                    try {
+                        $opsDate = app(\App\DomainServices\OperationalDateService::class)->current();
+                    } catch (\Throwable $e) {
+                        $opsDate = null;
+                    }
+                @endphp
+                @if($opsDate)
+                <div class="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                    Ops: {{ $opsDate->translatedFormat('d M Y') }}
                 </div>
+                @endif
             </div>
-        </div>
-    </div>
+        </header>
 
-    <!-- Page content -->
-    <div class="page-wrapper">
-        <div class="page-body">
+        {{-- Flash messages --}}
+        @if(session('success'))
+        <div class="mx-4 mt-4 md:mx-6 flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <x-heroicon-o-check-circle class="h-4 w-4 flex-shrink-0 text-emerald-500"/>
+            {{ session('success') }}
+        </div>
+        @endif
+        @if(session('error'))
+        <div class="mx-4 mt-4 md:mx-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <x-heroicon-o-x-circle class="h-4 w-4 flex-shrink-0 text-red-500"/>
+            {{ session('error') }}
+        </div>
+        @endif
+
+        {{-- Page content --}}
+        <main class="flex-1 p-4 md:p-6">
             {{ $slot }}
-        </div>
+        </main>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+
 @livewireScripts
 </body>
 </html>

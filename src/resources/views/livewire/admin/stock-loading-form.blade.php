@@ -1,236 +1,240 @@
 <div>
-    <div class="page-header d-print-none">
-        <div class="container-xl">
-            <div class="row g-2 align-items-center">
-                <div class="col">
-                    <h2 class="page-title">Stock Loading</h2>
-                </div>
-                <div class="col-auto ms-auto">
-                    <button class="btn btn-primary" wire:click="openCreate">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14"/><path d="M5 12l14 0"/></svg>
-                        Buat Loading
-                    </button>
-                </div>
-            </div>
+    {{-- Header --}}
+    <div class="mb-5 flex items-center justify-between">
+        <div>
+            <h2 class="text-sm font-semibold text-slate-900">Stock Loading</h2>
+            <p class="text-xs text-slate-400">Serahkan stok dari gudang ke salesman</p>
         </div>
+        <button wire:click="openCreate"
+                class="flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-800">
+            <x-heroicon-m-plus class="h-4 w-4"/>
+            Buat Loading
+        </button>
     </div>
 
-    <div class="page-body">
-        <div class="container-xl">
+    {{-- Flash --}}
+    @if(session('success'))
+    <div class="mb-4 flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <x-heroicon-o-check-circle class="h-4 w-4 flex-shrink-0 text-emerald-500"/>
+        {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <x-heroicon-o-x-circle class="h-4 w-4 flex-shrink-0 text-red-500"/>
+        {{ session('error') }}
+    </div>
+    @endif
 
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible mb-3">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible mb-3">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @if($showForm)
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title">Buat Stock Loading Baru</h3>
-                    </div>
-                    <div class="card-body">
-
-                        {{-- Pilih Salesman --}}
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label required">Salesman</label>
-                                <select class="form-select @error('salesman_id') is-invalid @enderror"
-                                    wire:model.live="salesman_id">
-                                    <option value="">-- Pilih Salesman --</option>
-                                    @foreach($salesmen as $s)
-                                        <option value="{{ $s->id }}">{{ $s->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('salesman_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                        </div>
-
-                        @if($salesman_id)
-                            {{-- Search Produk --}}
-                            <div class="mb-3">
-                                <label class="form-label">Tambah Produk</label>
-                                <div class="position-relative" style="max-width: 450px;">
-                                    <input type="text"
-                                        class="form-control"
-                                        wire:model.live.debounce.300ms="productSearch"
-                                        placeholder="Cari nama produk atau varian..."
-                                        autocomplete="off">
-
-                                    @if($showSearchResults)
-                                        <div class="dropdown-menu show w-100" style="max-height: 280px; overflow-y:auto;">
-                                            @foreach($searchResults as $result)
-                                                <button type="button"
-                                                    class="dropdown-item d-flex justify-content-between align-items-center py-2"
-                                                    wire:click="addProduct({{ $result['product_id'] }})">
-                                                    <div>
-                                                        <span class="fw-medium">{{ $result['product_name'] }}</span>
-                                                        @if($result['variant'])
-                                                            <span class="text-muted"> — {{ $result['variant'] }}</span>
-                                                        @endif
-                                                        <small class="text-muted d-block">({{ $result['unit'] }})</small>
-                                                    </div>
-                                                    <span class="badge {{ $result['gudang_qty'] > 0 ? 'bg-success-lt' : 'bg-danger-lt' }} ms-2">
-                                                        Stok: {{ number_format($result['gudang_qty'], 0) }}
-                                                    </span>
-                                                </button>
-                                            @endforeach
-                                        </div>
-                                    @endif
-
-                                    @if(strlen(trim($productSearch)) >= 2 && !$showSearchResults)
-                                        <div class="dropdown-menu show w-100">
-                                            <span class="dropdown-item text-muted">Tidak ada produk ditemukan.</span>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="form-hint">Ketik minimal 2 karakter untuk mencari produk.</div>
-                            </div>
-
-                            {{-- Tabel item yang sudah dipilih --}}
-                            @error('items') <div class="alert alert-warning py-2 mb-3">{{ $message }}</div> @enderror
-
-                            @if(count($items) > 0)
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-vcenter">
-                                        <thead>
-                                            <tr>
-                                                <th>Produk</th>
-                                                <th class="text-center" style="width:120px">Stok Gudang</th>
-                                                <th style="width:150px">Qty Loading</th>
-                                                <th style="width:50px"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($items as $index => $item)
-                                                <tr>
-                                                    <td>
-                                                        <span class="fw-medium">{{ $item['product_name'] }}</span>
-                                                        @if($item['variant'])
-                                                            <span class="text-muted"> — {{ $item['variant'] }}</span>
-                                                        @endif
-                                                        <small class="text-muted d-block">({{ $item['unit'] }})</small>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="{{ $item['gudang_qty'] <= 0 ? 'text-danger' : 'text-success' }} fw-bold">
-                                                            {{ number_format($item['gudang_qty'], 0) }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <input type="number"
-                                                            class="form-control form-control-sm @error('items.'.$index.'.qty') is-invalid @enderror"
-                                                            wire:model="items.{{ $index }}.qty"
-                                                            min="0"
-                                                            max="{{ $item['gudang_qty'] }}"
-                                                            step="1"
-                                                            {{ $item['gudang_qty'] <= 0 ? 'disabled' : '' }}>
-                                                        @error('items.'.$index.'.qty')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </td>
-                                                    <td>
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-ghost-danger"
-                                                            wire:click="removeItem({{ $index }})"
-                                                            title="Hapus">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @else
-                                <div class="text-muted py-3">
-                                    Belum ada produk ditambahkan. Cari dan pilih produk di atas.
-                                </div>
-                            @endif
-                        @else
-                            <p class="text-muted">Pilih salesman terlebih dahulu.</p>
-                        @endif
-                    </div>
-
-                    <div class="card-footer d-flex gap-2">
-                        <button class="btn btn-primary" wire:click="save" wire:loading.attr="disabled"
-                            {{ count($items) === 0 ? 'disabled' : '' }}>
-                            <span wire:loading wire:target="save" class="spinner-border spinner-border-sm me-1"></span>
-                            Post Loading
-                        </button>
-                        <button class="btn btn-secondary" wire:click="cancelForm">Batal</button>
-                    </div>
-                </div>
-            @endif
-
-            {{-- List Stock Loading --}}
-            <div class="card">
-                <div class="card-header">
-                    <select class="form-select" style="max-width:200px" wire:model.live="filterSalesman">
-                        <option value="">Semua Salesman</option>
-                        @foreach($salesmen as $s)
-                            <option value="{{ $s->id }}">{{ $s->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-vcenter card-table">
-                        <thead>
-                            <tr>
-                                <th>No. Dokumen</th>
-                                <th>Salesman</th>
-                                <th>Tgl Operasional</th>
-                                <th>Item</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($loadings as $loading)
-                                <tr>
-                                    <td><code>{{ $loading->document_number }}</code></td>
-                                    <td>{{ $loading->salesman->name ?? '-' }}</td>
-                                    <td>{{ $loading->operational_date }}</td>
-                                    <td>
-                                        @foreach($loading->items as $item)
-                                            <small class="d-block">
-                                                {{ $item->product->product_name ?? '-' }}
-                                                @if($item->product?->variant)
-                                                    <span class="text-muted">— {{ $item->product->variant }}</span>
-                                                @endif
-                                                : {{ number_format($item->qty, 0) }}
-                                            </small>
-                                        @endforeach
-                                    </td>
-                                    <td>
-                                        @php
-                                            $badgeClass = match($loading->status) {
-                                                'POSTED'    => 'bg-success',
-                                                'CANCELLED' => 'bg-danger',
-                                                default     => 'bg-secondary',
-                                            };
-                                        @endphp
-                                        <span class="badge {{ $badgeClass }}">{{ $loading->status }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">Belum ada stock loading.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                @if($loadings->hasPages())
-                    <div class="card-footer">{{ $loadings->links() }}</div>
-                @endif
+    {{-- Form --}}
+    @if($showForm)
+    <div class="mb-5 rounded-xl border border-slate-200 bg-white">
+        <div class="border-b border-slate-100 px-5 py-4">
+            <h3 class="text-sm font-semibold text-slate-900">Buat Stock Loading Baru</h3>
+        </div>
+        <div class="px-5 py-4">
+            {{-- Pilih Salesman --}}
+            <div class="mb-5 max-w-xs">
+                <label class="mb-1.5 block text-xs font-semibold text-slate-700">Salesman <span class="text-red-500">*</span></label>
+                <select wire:model.live="salesman_id"
+                        class="w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2
+                               {{ $errors->has('salesman_id') ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-amber-400 focus:ring-amber-100' }}">
+                    <option value="">-- Pilih Salesman --</option>
+                    @foreach($salesmen as $s)
+                    <option value="{{ $s->id }}">{{ $s->name }}</option>
+                    @endforeach
+                </select>
+                @error('salesman_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            @if($salesman_id)
+            {{-- Search Produk --}}
+            <div class="mb-4">
+                <label class="mb-1.5 block text-xs font-semibold text-slate-700">Tambah Produk</label>
+                <div class="relative max-w-md">
+                    <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/>
+                    <input type="text" wire:model.live.debounce.300ms="productSearch"
+                           placeholder="Cari nama produk atau varian..."
+                           autocomplete="off"
+                           class="w-full rounded-lg border border-slate-200 py-2.5 pl-9 pr-3 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                    @if($showSearchResults)
+                    <div class="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                        <div class="max-h-64 overflow-y-auto">
+                            @foreach($searchResults as $result)
+                            <button type="button" wire:click="addProduct({{ $result['product_id'] }})"
+                                    class="flex w-full items-center justify-between px-4 py-2.5 text-left hover:bg-slate-50 transition-colors">
+                                <div>
+                                    <span class="text-sm font-semibold text-slate-900">{{ $result['product_name'] }}</span>
+                                    @if($result['variant'])
+                                    <span class="text-sm text-slate-400"> — {{ $result['variant'] }}</span>
+                                    @endif
+                                    <span class="block text-xs text-slate-400">({{ $result['unit'] }})</span>
+                                </div>
+                                <span class="ml-3 flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold
+                                             {{ $result['gudang_qty'] > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
+                                    Stok: {{ number_format($result['gudang_qty'], 0) }}
+                                </span>
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                    @if(strlen(trim($productSearch)) >= 2 && !$showSearchResults)
+                    <div class="absolute z-10 mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
+                        <p class="text-sm text-slate-400">Tidak ada produk ditemukan.</p>
+                    </div>
+                    @endif
+                </div>
+                <p class="mt-1 text-xs text-slate-400">Ketik minimal 2 karakter untuk mencari produk.</p>
+            </div>
+
+            {{-- Error items --}}
+            @error('items')
+            <div class="mb-3 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+                <x-heroicon-o-exclamation-triangle class="h-4 w-4 flex-shrink-0"/>
+                {{ $message }}
+            </div>
+            @enderror
+
+            {{-- Items table --}}
+            @if(count($items) > 0)
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50">
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Produk</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Stok Gudang</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500" style="width:160px">Qty Loading</th>
+                            <th class="px-4 py-3" style="width:48px"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @foreach($items as $index => $item)
+                        <tr>
+                            <td class="px-4 py-3">
+                                <p class="font-semibold text-slate-900">{{ $item['product_name'] }}</p>
+                                @if($item['variant'])
+                                <p class="text-xs text-slate-400">{{ $item['variant'] }} · {{ $item['unit'] }}</p>
+                                @else
+                                <p class="text-xs text-slate-400">{{ $item['unit'] }}</p>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="font-bold {{ $item['gudang_qty'] <= 0 ? 'text-red-500' : 'text-emerald-600' }}">
+                                    {{ number_format($item['gudang_qty'], 0) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <input type="number" wire:model="items.{{ $index }}.qty"
+                                       min="0" max="{{ $item['gudang_qty'] }}" step="1"
+                                       {{ $item['gudang_qty'] <= 0 ? 'disabled' : '' }}
+                                       class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2
+                                              {{ $errors->has('items.'.$index.'.qty') ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-amber-400 focus:ring-amber-100' }}
+                                              disabled:bg-slate-50 disabled:text-slate-400">
+                                @error('items.'.$index.'.qty')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                            </td>
+                            <td class="px-4 py-3">
+                                <button type="button" wire:click="removeItem({{ $index }})"
+                                        class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500">
+                                    <x-heroicon-m-x-mark class="h-4 w-4"/>
+                                </button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <div class="rounded-xl border border-dashed border-slate-200 px-5 py-8 text-center">
+                <x-heroicon-o-cube class="mx-auto mb-2 h-8 w-8 text-slate-300"/>
+                <p class="text-sm text-slate-400">Belum ada produk. Cari dan pilih produk di atas.</p>
+            </div>
+            @endif
+            @else
+            <div class="rounded-xl border border-dashed border-slate-200 px-5 py-8 text-center">
+                <p class="text-sm text-slate-400">Pilih salesman terlebih dahulu.</p>
+            </div>
+            @endif
         </div>
+        <div class="flex gap-2 border-t border-slate-100 px-5 py-3">
+            <button wire:click="save" wire:loading.attr="disabled"
+                    {{ count($items) === 0 ? 'disabled' : '' }}
+                    class="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-50">
+                <span wire:loading wire:target="save">
+                    <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                </span>
+                Post Loading
+            </button>
+            <button wire:click="cancelForm"
+                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
+                Batal
+            </button>
+        </div>
+    </div>
+    @endif
+
+    {{-- List --}}
+    <div class="rounded-xl border border-slate-200 bg-white">
+        <div class="border-b border-slate-100 px-5 py-3">
+            <select wire:model.live="filterSalesman"
+                    class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                <option value="">Semua Salesman</option>
+                @foreach($salesmen as $s)
+                <option value="{{ $s->id }}">{{ $s->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">No. Dokumen</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Salesman</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Tgl Operasional</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Item</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @forelse($loadings as $loading)
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-5 py-3 font-mono text-xs text-slate-600">{{ $loading->document_number }}</td>
+                        <td class="px-4 py-3 font-semibold text-slate-900">{{ $loading->salesman->name ?? '-' }}</td>
+                        <td class="px-4 py-3 text-slate-600">{{ $loading->operational_date }}</td>
+                        <td class="px-4 py-3">
+                            @foreach($loading->items as $item)
+                            <p class="text-xs text-slate-600">
+                                {{ $item->product->product_name ?? '-' }}
+                                @if($item->product?->variant)
+                                <span class="text-slate-400">— {{ $item->product->variant }}</span>
+                                @endif
+                                : {{ number_format($item->qty, 0) }}
+                            </p>
+                            @endforeach
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            @php
+                                $color = match($loading->status) {
+                                    'POSTED'    => 'bg-emerald-100 text-emerald-700',
+                                    'CANCELLED' => 'bg-red-100 text-red-700',
+                                    default     => 'bg-slate-100 text-slate-500',
+                                };
+                            @endphp
+                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $color }}">{{ $loading->status }}</span>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">Belum ada stock loading.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if($loadings->hasPages())
+        <div class="border-t border-slate-100 px-5 py-3">{{ $loadings->links() }}</div>
+        @endif
     </div>
 </div>

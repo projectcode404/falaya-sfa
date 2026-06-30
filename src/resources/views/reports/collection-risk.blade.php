@@ -1,54 +1,64 @@
 <x-layouts.app heading="Collection Risk">
-    <div class="card mb-3">
-        <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
-                <div class="col-sm-3">
-                    <label class="form-label">Dari</label>
-                    <input type="date" name="from" class="form-control" value="{{ $from->toDateString() }}">
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">Sampai</label>
-                    <input type="date" name="to" class="form-control" value="{{ $to->toDateString() }}">
-                </div>
-                <div class="col-sm-3">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-            </form>
-        </div>
+
+    <div class="mb-5 rounded-xl border border-slate-200 bg-white p-5">
+        <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-700">Dari</label>
+                <input type="date" name="from" value="{{ $from->toDateString() }}"
+                       class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-700">Sampai</label>
+                <input type="date" name="to" value="{{ $to->toDateString() }}"
+                       class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+            </div>
+            <div class="flex items-end">
+                <button type="submit"
+                        class="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800">
+                    Filter
+                </button>
+            </div>
+        </form>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Customer dengan Frekuensi Skip Tinggi</h3>
+    <div class="rounded-xl border border-slate-200 bg-white">
+        <div class="border-b border-slate-100 px-5 py-4">
+            <h2 class="text-sm font-semibold text-slate-900">Customer dengan Frekuensi Skip Tinggi</h2>
         </div>
-        <div class="table-responsive">
-            <table class="table table-vcenter card-table">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th>Customer</th>
-                        <th>Salesman</th>
-                        <th class="text-center">Jumlah Skip</th>
-                        <th>Terakhir Skip</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Customer</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Salesman</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Jumlah Skip</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Terakhir Skip</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-50">
                     @forelse($rows as $r)
-                        <tr>
-                            <td>{{ $r->customer->customer_name ?? '-' }}</td>
-                            <td>{{ $r->salesman->name ?? '-' }}</td>
-                            <td class="text-center">
-                                <span class="badge {{ $r->total_skip >= 3 ? 'bg-danger' : 'bg-warning-lt' }}">
-                                    {{ $r->total_skip }}x
-                                </span>
-                            </td>
-                            <td>{{ $r->last_skip }}</td>
-                        </tr>
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-5 py-3 font-semibold text-slate-900">{{ $r->customer->customer_name ?? '-' }}</td>
+                        <td class="px-4 py-3 text-slate-700">{{ $r->salesman->name ?? '-' }}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="rounded-full px-2.5 py-1 text-xs font-bold
+                                         {{ $r->total_skip >= 3 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' }}">
+                                {{ $r->total_skip }}x
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-slate-600">{{ $r->last_skip }}</td>
+                    </tr>
                     @empty
-                        <tr><td colspan="4" class="text-center text-muted py-4">Tidak ada data collection risk.</td></tr>
+                    <tr>
+                        <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">Tidak ada data collection risk.</td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="card-footer">{{ $rows->withQueryString()->links() }}</div>
+        @if($rows->hasPages())
+        <div class="border-t border-slate-100 px-5 py-3">{{ $rows->withQueryString()->links() }}</div>
+        @endif
     </div>
+
 </x-layouts.app>

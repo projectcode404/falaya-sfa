@@ -55,6 +55,13 @@
         <div class="text-center mb-3" style="font-size:0.8rem;color:#616876">
             {{ $step === 1 ? 'Pilih Produk' : 'Konfirmasi Order' }}
         </div>
+
+        @if ($submitError)
+        <div class="falaya-card falaya-card--danger p-3 mb-3">
+            <div style="font-size:0.85rem;color:#991b1b">⚠️ {{ $submitError }}</div>
+        </div>
+        @endif
+
         {{-- ══════════════ STEP 1: Pilih Produk ════════════════════ --}}
         @if ($step === 1)
         <div>

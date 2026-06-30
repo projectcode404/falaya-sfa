@@ -16,6 +16,8 @@ class VisitDetail extends Component
 {
     public VisitPlan $visitPlan;
 
+    public string $actionError = '';
+
     public function mount(VisitPlan $visitPlan): void
     {
         if ($visitPlan->salesman_id !== Auth::id()) {
@@ -48,24 +50,37 @@ class VisitDetail extends Component
 
     public function checkout(CheckoutVisitAction $action): void
     {
+        $this->actionError = '';
+
         try {
             $action->execute($this->visitPlan, []);
             $this->visitPlan->refresh();
         } catch (\LogicException $e) {
-            session()->flash('error', $e->getMessage());
+            $this->actionError = $e->getMessage();
         }
     }
 
     public function markOutletClosed(ManualUpdateVisitStatusAction $action): void
     {
-        $action->execute($this->visitPlan, 'OUTLET_CLOSED');
-        $this->visitPlan->refresh();
-    }
+        $this->actionError = '';
 
-    public function markNoOrder(ManualUpdateVisitStatusAction $action): void
-    {
-        $action->execute($this->visitPlan, 'NO_ORDER');
-        $this->visitPlan->refresh();
+        // Outlet Tutup hanya relevan untuk visit yang BELUM check-in sama
+        // sekali (outlet tidak buka, tidak ada yang menerima kedatangan).
+        // Bila sudah IN_PROGRESS, jalur yang benar adalah Checkout --
+        // bukan Outlet Tutup, supaya VisitRealization (checkin/checkout)
+        // tetap tercatat konsisten.
+        if ($this->visitPlan->status !== 'PLANNED') {
+            $this->actionError = 'Kunjungan sudah dimulai. Gunakan Check-out untuk menyelesaikan.';
+
+            return;
+        }
+
+        try {
+            $action->execute($this->visitPlan, 'OUTLET_CLOSED');
+            $this->visitPlan->refresh();
+        } catch (\LogicException $e) {
+            $this->actionError = $e->getMessage();
+        }
     }
 
     public function render()
@@ -79,7 +94,6 @@ class VisitDetail extends Component
             ->get();
 
         $outstandingTotal = $invoices->sum('remaining_amount');
-
         $outstandingInvoices = $invoices->map(fn ($inv) => [
             'invoice_number' => $inv->invoice_number,
             'remaining_amount' => $inv->remaining_amount,
@@ -102,6 +116,20 @@ class VisitDetail extends Component
         $isCheckedIn = in_array($this->visitPlan->status, ['IN_PROGRESS', 'COMPLETED', 'NO_ORDER', 'OUTLET_CLOSED']);
         $isDone = in_array($this->visitPlan->status, ['COMPLETED', 'NO_ORDER', 'OUTLET_CLOSED', 'SKIPPED']);
 
+        $hasPostedOrder = $this->visitPlan->salesOrders()
+            ->where('status', 'POSTED')
+            ->exists();
+
+        // Riwayat SO & Payment untuk visit ini -- ditampilkan agar salesman
+        // bisa cek dulu sebelum checkout (apa yang sudah tercatat).
+        $visitOrders = $this->visitPlan->salesOrders()
+            ->whereIn('status', ['DRAFT', 'POSTED'])
+            ->get(['id', 'document_number', 'status', 'payment_type', 'total_amount']);
+
+        $visitPayments = $this->visitPlan->payments()
+            ->whereIn('status', ['DRAFT', 'POSTED'])
+            ->get(['id', 'payment_number', 'status', 'payment_method', 'total_amount']);
+
         return view('livewire.pwa.visit-detail', [
             'visit' => $this->visitPlan,
             'customerOutstanding' => $customerOutstanding,
@@ -110,6 +138,10 @@ class VisitDetail extends Component
             'defaultRadius' => $defaultRadius,
             'isCheckedIn' => $isCheckedIn,
             'isDone' => $isDone,
+            'hasPostedOrder' => $hasPostedOrder,
+            'actionError' => $this->actionError,
+            'visitOrders' => $visitOrders,
+            'visitPayments' => $visitPayments,
         ])->layout('components.pwa.layout', ['title' => 'Detail Kunjungan']);
     }
 }
