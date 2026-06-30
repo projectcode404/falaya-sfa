@@ -1,6 +1,6 @@
 <div>
     <div class="pwa-header">
-        <h5>📦 Stok Bawaan</h5>
+        <h5><x-heroicon-o-archive-box style="width:18px;height:18px;display:inline;vertical-align:-3px;margin-right:4px" /> Stok Bawaan</h5>
         <small>Total: {{ number_format($totalQty, 0) }} pcs</small>
     </div>
     <div class="px-3">

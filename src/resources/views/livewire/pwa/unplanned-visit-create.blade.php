@@ -7,13 +7,13 @@
          ============================================================ --}}
     <style>
         .search-input { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; color: #374151; }
-        .search-input:focus { outline: none; border-color: #206bc4; box-shadow: 0 0 0 3px rgba(32,107,196,0.12); }
+        .search-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.12); }
         .customer-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
         .customer-row:last-child { border-bottom: none; }
         .customer-row:active { background: #f4f6fb; }
         .customer-row--selected { background: #f0f6ff; }
         .confirm-bar { position: fixed; bottom: var(--pwa-navbar-h, 64px); left: 0; right: 0; background: white; border-top: 1px solid #e6e7e9; padding: 12px 16px; z-index: 110; box-shadow: 0 -2px 8px rgba(0,0,0,0.08); }
-        .btn-submit { width: 100%; min-height: 50px; border-radius: 10px; border: none; background: #206bc4; color: white; font-weight: 700; font-size: 1rem; }
+        .btn-submit { width: 100%; min-height: 50px; border-radius: 10px; border: none; background: #f59e0b; color: #0f172a; font-weight: 700; font-size: 1rem; }
         .btn-submit:disabled { background: #9ca3af; }
     </style>
 
@@ -39,7 +39,7 @@
             <button
                 type="button"
                 wire:click="clearSelection"
-                style="font-size:0.8rem;color:#206bc4;background:none;border:none;padding:0;text-decoration:underline"
+                style="font-size:0.8rem;color:#f59e0b;background:none;border:none;padding:0;text-decoration:underline"
             >Ganti outlet</button>
         </div>
         @else

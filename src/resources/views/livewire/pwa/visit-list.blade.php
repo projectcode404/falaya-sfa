@@ -12,11 +12,11 @@
         .visit-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
         /* Status badge variants */
         .bs-planned    { background:#e6e7e9;color:#616876; }
-        .bs-inprogress { background:#dbeafe;color:#1d4ed8; }
+        .bs-inprogress { background:#fffbeb;color:#b45309; }
         .bs-completed  { background:#dcfce7;color:#15803d; }
         .bs-noorder    { background:#fef9c3;color:#854d0e; }
         .bs-closed     { background:#e6e7e9;color:#374151; }
-        .bs-skipped    { background:#fee2e2;color:#991b1b; }
+        .bs-skipped    { background:#fef2f2;color:#991b1b; }
         .status-badge  { font-size:0.7rem;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap; }
         .section-group { background:white;border-radius:12px;border:1px solid #e6e7e9;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden;margin:0 12px 12px; }
         .section-toggle { display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f8f9fa;border-bottom:1px solid #e6e7e9;cursor:pointer;user-select:none; }
@@ -38,13 +38,17 @@
     @endphp
 
     @if ($pending->count() > 0)
-    <span class="section-label">📍 Belum Dikunjungi ({{ $pending->count() }})</span>
+    <span class="section-label d-flex align-items-center gap-1"><x-heroicon-o-map-pin style="width:13px;height:13px" /> Belum Dikunjungi ({{ $pending->count() }})</span>
     <div class="section-group">
         @foreach ($pending->sortByDesc(fn($v) => $v['status'] === 'IN_PROGRESS') as $visit)
         <a href="{{ route('pwa.pages.visits.detail', $visit['id']) }}" class="visit-card d-flex">
             {{-- icon --}}
-            <div class="visit-icon" style="background:{{ $visit['status'] === 'IN_PROGRESS' ? '#dbeafe' : '#f4f6fb' }}">
-                {{ $visit['status'] === 'IN_PROGRESS' ? '📡' : '📍' }}
+            <div class="visit-icon" style="background:{{ $visit['status'] === 'IN_PROGRESS' ? '#fffbeb' : '#f4f6fb' }}">
+                @if ($visit['status'] === 'IN_PROGRESS')
+                    <x-heroicon-o-signal style="width:20px;height:20px;color:#b45309" />
+                @else
+                    <x-heroicon-o-map-pin style="width:20px;height:20px;color:#64748b" />
+                @endif
             </div>
 
             {{-- info --}}
@@ -52,7 +56,7 @@
                 <div style="font-size:0.92rem;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $visit['customer_name'] }}</div>
                 <div style="font-size:0.78rem;color:#616876;margin-top:1px">{{ $visit['area_name'] }}</div>
                 @if ($visit['has_outstanding'])
-                <div style="font-size:0.72rem;color:#d97706;margin-top:2px">💰 Ada tagihan</div>
+                <div style="font-size:0.72rem;color:#d97706;margin-top:2px;display:flex;align-items:center;gap:3px"><x-heroicon-o-banknotes style="width:12px;height:12px" /> Ada tagihan</div>
                 @endif
             </div>
 
@@ -81,7 +85,7 @@
     @if ($done->count() > 0)
     <div x-data="{ open: false }" class="mx-3 mb-3" style="border-radius:12px;border:1px solid #e6e7e9;background:white;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden">
         <div class="section-toggle" @click="open = !open">
-            <span class="section-toggle-label">✅ Sudah Selesai</span>
+            <span class="section-toggle-label d-flex align-items-center gap-1"><x-heroicon-o-check-circle style="width:14px;height:14px;color:#15803d" /> Sudah Selesai</span>
             <div class="d-flex align-items-center gap-2">
                 <span class="section-toggle-count">{{ $done->count() }}</span>
                 <span style="font-size:0.8rem;color:#616876;transition:transform 0.2s" :style="open ? 'transform:rotate(180deg)' : ''">▾</span>
@@ -93,10 +97,10 @@
             <a href="{{ route('pwa.pages.visits.detail', $visit['id']) }}" class="visit-card d-flex">
                 <div class="visit-icon" style="background:#f4f6fb">
                     @switch($visit['status'])
-                        @case('COMPLETED')  <span>🛒</span> @break
-                        @case('NO_ORDER')   <span>👋</span> @break
-                        @case('OUTLET_CLOSED') <span>🔒</span> @break
-                        @case('SKIPPED')    <span>⏭️</span> @break
+                        @case('COMPLETED')  <x-heroicon-o-shopping-cart style="width:18px;height:18px;color:#64748b" /> @break
+                        @case('NO_ORDER')   <x-heroicon-o-hand-raised style="width:18px;height:18px;color:#64748b" /> @break
+                        @case('OUTLET_CLOSED') <x-heroicon-o-lock-closed style="width:18px;height:18px;color:#64748b" /> @break
+                        @case('SKIPPED')    <x-heroicon-o-forward style="width:18px;height:18px;color:#64748b" /> @break
                     @endswitch
                 </div>
 
@@ -126,7 +130,7 @@
     {{-- ── Empty state (no visits at all) ─────────────────────────── --}}
     @if ($visits->count() === 0)
     <div class="empty-state">
-        <div style="font-size:2.5rem;margin-bottom:12px">📋</div>
+        <div style="margin-bottom:12px;display:flex;justify-content:center"><x-heroicon-o-clipboard-document-list style="width:40px;height:40px;color:#94a3b8" /></div>
         <div style="font-weight:600;margin-bottom:4px">Belum ada kunjungan hari ini</div>
         <div style="font-size:0.85rem">Admin belum menyiapkan jadwal kunjungan.</div>
     </div>

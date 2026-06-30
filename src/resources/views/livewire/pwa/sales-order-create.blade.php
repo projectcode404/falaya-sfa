@@ -9,14 +9,14 @@
         .falaya-card { border-radius: 12px; border: 1px solid #e6e7e9; margin-bottom: 12px; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
         .falaya-card--danger  { border-color: #d63939; background: #fff5f5; }
         .falaya-card--warning { border-color: #f59f00; background: #fffbf0; }
-        .falaya-card--info    { border-color: #206bc4; background: #f0f6ff; }
+        .falaya-card--info    { border-color: #f59e0b; background: #f0f6ff; }
         .falaya-card--success { border-color: #2fb344; background: #f4fdf5; }
         .falaya-card__title   { font-weight: 600; font-size: 1rem; color: #1a1a2e; }
         /* Payment type toggle pill */
         .payment-toggle { display: flex; background: #f4f6fb; border-radius: 10px; padding: 4px; gap: 4px; }
         .payment-toggle__btn { flex: 1; min-height: 44px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.92rem; transition: all 0.15s; background: transparent; color: #616876; }
         .payment-toggle__btn--active-cash   { background: #2fb344; color: white; box-shadow: 0 2px 6px rgba(47,179,68,0.3); }
-        .payment-toggle__btn--active-credit { background: #206bc4; color: white; box-shadow: 0 2px 6px rgba(32,107,196,0.3); }
+        .payment-toggle__btn--active-credit { background: #f59e0b; color: #0f172a; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
         /* Product row */
         .product-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #f0f0f0; }
         .product-row:last-child { border-bottom: none; }
@@ -27,19 +27,19 @@
         .qty-val { width: 40px; height: 36px; border: none; border-left: 1px solid #d1d5db; border-right: 1px solid #d1d5db; text-align: center; font-weight: 700; font-size: 0.95rem; color: #1a1a2e; background: white; }
         /* Sticky bottom bar */
         .sticky-bottom-bar { position: fixed; bottom: var(--pwa-navbar-h, 64px); left: 0; right: 0; background: white; border-top: 1px solid #e6e7e9; padding: 12px 16px; z-index: 110; box-shadow: 0 -2px 8px rgba(0,0,0,0.08); }
-        .btn-submit { width: 100%; min-height: 50px; border-radius: 10px; border: none; background: #206bc4; color: white; font-weight: 700; font-size: 1rem; }
+        .btn-submit { width: 100%; min-height: 50px; border-radius: 10px; border: none; background: #f59e0b; color: #0f172a; font-weight: 700; font-size: 1rem; }
         .btn-submit:disabled { background: #9ca3af; }
         /* Step indicator */
         .step-indicator { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 16px; }
         .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; }
-        .step-dot--active { background: #206bc4; color: white; }
+        .step-dot--active { background: #f59e0b; color: #0f172a; }
         .step-dot--done   { background: #2fb344; color: white; }
         .step-dot--idle   { background: #e6e7e9; color: #9ca3af; }
         .step-line { width: 40px; height: 2px; background: #e6e7e9; }
         .step-line--done { background: #2fb344; }
         /* Search input */
         .search-input { width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; color: #374151; }
-        .search-input:focus { outline: none; border-color: #206bc4; box-shadow: 0 0 0 3px rgba(32,107,196,0.12); }
+        .search-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.12); }
         .credit-bar { height: 8px; border-radius: 4px; background: #e6e7e9; overflow: hidden; margin-top: 4px; }
         .credit-bar__fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
         .back-btn { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #616876; text-decoration: none; padding: 12px 16px 4px; }
@@ -109,7 +109,7 @@
                         <span>Sisa: <strong style="color:{{ $remaining > 0 ? '#15803d' : '#d63939' }}">Rp {{ number_format($remaining, 0, ',', '.') }}</strong></span>
                     </div>
                     <div class="credit-bar">
-                        <div class="credit-bar__fill" style="width:{{ $usedPct }}%;background:{{ $overLimit ? '#d63939' : '#206bc4' }}"></div>
+                        <div class="credit-bar__fill" style="width:{{ $usedPct }}%;background:{{ $overLimit ? '#d63939' : '#f59e0b' }}"></div>
                     </div>
                     @if ($overLimit)
                     <div style="font-size:0.78rem;color:#991b1b;margin-top:6px;font-weight:600">
@@ -186,7 +186,7 @@
                     🏪 {{ $customer->customer_name }} · {{ $customer->area->area_name }}
                 </div>
                 <div style="font-size:0.82rem;margin-bottom:12px">
-                    <span style="background:{{ $paymentType === 'CASH' ? '#dcfce7' : '#dbeafe' }};color:{{ $paymentType === 'CASH' ? '#15803d' : '#1d4ed8' }};padding:2px 10px;border-radius:20px;font-weight:600">
+                    <span style="background:{{ $paymentType === 'CASH' ? '#dcfce7' : '#fffbeb' }};color:{{ $paymentType === 'CASH' ? '#15803d' : '#b45309' }};padding:2px 10px;border-radius:20px;font-weight:600">
                         {{ $paymentType === 'CASH' ? '💵 CASH' : '💳 KREDIT' }}
                     </span>
                 </div>
@@ -201,7 +201,7 @@
                 @endforeach
                 <div class="d-flex justify-content-between align-items-center pt-3">
                     <div style="font-weight:700;color:#1a1a2e;font-size:1rem">Total</div>
-                    <div style="font-size:1.25rem;font-weight:800;color:#206bc4">
+                    <div style="font-size:1.25rem;font-weight:800;color:#f59e0b">
                         Rp {{ number_format(collect($items)->filter(fn($i) => $i['qty'] > 0)->sum(fn($i) => $i['qty'] * $i['unit_price']), 0, ',', '.') }}
                     </div>
                 </div>
@@ -232,7 +232,7 @@
         @if ($step === 1)
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div style="font-size:0.82rem;color:#616876">Total</div>
-            <div style="font-size:1.1rem;font-weight:800;color:#206bc4">Rp {{ number_format($grandTotal, 0, ',', '.') }}</div>
+            <div style="font-size:1.1rem;font-weight:800;color:#f59e0b">Rp {{ number_format($grandTotal, 0, ',', '.') }}</div>
         </div>
         <button wire:click="nextStep" class="btn-submit">
             Lanjut → Konfirmasi

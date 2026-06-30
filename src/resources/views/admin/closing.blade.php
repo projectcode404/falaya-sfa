@@ -49,28 +49,19 @@
                         <x-heroicon-o-x-circle class="h-5 w-5 flex-shrink-0 text-red-500 mt-0.5"/>
                         <div>
                             <p class="text-sm font-semibold text-red-800">Belum bisa ditutup.</p>
-                            <p class="text-xs text-red-700 mt-0.5">{{ count($result['blockers']) }} hal perlu diselesaikan terlebih dahulu.</p>
+                            <p class="text-xs text-red-700 mt-0.5">{{ count($result['errors']) }} hal perlu diselesaikan terlebih dahulu.</p>
                         </div>
                     </div>
 
                     <div class="mb-5 space-y-2">
-                        @foreach($result['blockers'] as $blocker)
+                        @foreach($result['errors'] as $blocker)
                         <div class="flex items-start justify-between gap-4 rounded-lg border border-red-100 bg-red-50/50 px-4 py-3">
                             <div class="flex items-start gap-3">
                                 <x-heroicon-o-exclamation-circle class="h-4 w-4 flex-shrink-0 text-red-500 mt-0.5"/>
                                 <div>
-                                    <p class="text-sm font-semibold text-slate-900">{{ $blocker['label'] }}</p>
-                                    @if(isset($blocker['detail']))
-                                    <p class="mt-0.5 text-xs text-slate-500">{{ $blocker['detail'] }}</p>
-                                    @endif
+                                    <p class="text-sm font-semibold text-slate-900">{{ $blocker['message'] }}</p>
                                 </div>
                             </div>
-                            @if(isset($blocker['url']))
-                            <a href="{{ $blocker['url'] }}"
-                               class="flex-shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
-                                Selesaikan →
-                            </a>
-                            @endif
                         </div>
                         @endforeach
                     </div>

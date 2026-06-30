@@ -9,22 +9,22 @@
         .falaya-card--danger  { border-color: #d63939; background: #fff5f5; }
         .falaya-card--warning { border-color: #f59f00; background: #fffbf0; }
         .falaya-card--success { border-color: #2fb344; background: #f4fdf5; }
-        .falaya-card--info    { border-color: #206bc4; background: #f0f6ff; }
+        .falaya-card--info    { border-color: #f59e0b; background: #f0f6ff; }
         .falaya-card__title   { font-weight: 600; font-size: 1rem; color: #1a1a2e; }
         /* Invoice card */
         .invoice-card { border-radius: 10px; border: 2px solid #e6e7e9; margin-bottom: 8px; overflow: hidden; transition: border-color 0.15s; cursor: pointer; }
-        .invoice-card--selected { border-color: #206bc4; background: #f0f6ff; }
+        .invoice-card--selected { border-color: #f59e0b; background: #f0f6ff; }
         .invoice-card--overdue  { border-color: #d63939; }
         .invoice-card--duesoon  { border-color: #f59f00; }
         .invoice-card__body { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 60px; }
         .invoice-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
-        .invoice-check--checked { background: #206bc4; border-color: #206bc4; }
+        .invoice-check--checked { background: #f59e0b; border-color: #f59e0b; }
         /* Amount input */
-        .amount-input { width: 100%; font-size: 1.5rem; font-weight: 700; color: #1a1a2e; border: none; border-bottom: 2px solid #206bc4; padding: 8px 0; text-align: center; background: transparent; }
+        .amount-input { width: 100%; font-size: 1.5rem; font-weight: 700; color: #1a1a2e; border: none; border-bottom: 2px solid #f59e0b; padding: 8px 0; text-align: center; background: transparent; }
         .amount-input:focus { outline: none; }
         /* Sticky bottom */
         .sticky-bottom-bar { position: fixed; bottom: var(--pwa-navbar-h, 64px); left: 0; right: 0; background: white; border-top: 1px solid #e6e7e9; padding: 12px 16px; z-index: 110; box-shadow: 0 -2px 8px rgba(0,0,0,0.08); }
-        .btn-submit { width: 100%; min-height: 50px; border-radius: 10px; border: none; background: #206bc4; color: white; font-weight: 700; font-size: 1rem; }
+        .btn-submit { width: 100%; min-height: 50px; border-radius: 10px; border: none; background: #f59e0b; color: #0f172a; font-weight: 700; font-size: 1rem; }
         .btn-submit:disabled { background: #9ca3af; }
         /* Skip section */
         .skip-toggle { display: flex; align-items: center; justify-content: space-between; padding: 14px; cursor: pointer; user-select: none; }
@@ -33,7 +33,7 @@
         .skip-radio:first-of-type { border-top: none; }
         .skip-radio input[type=radio] { accent-color: #d63939; width: 18px; height: 18px; flex-shrink: 0; }
         .skip-radio label { font-size: 0.88rem; color: #374151; cursor: pointer; flex-grow: 1; }
-        .select-all-btn { font-size: 0.8rem; color: #206bc4; font-weight: 600; text-decoration: none; background: none; border: none; padding: 0; }
+        .select-all-btn { font-size: 0.8rem; color: #f59e0b; font-weight: 600; text-decoration: none; background: none; border: none; padding: 0; }
     </style>
 
     <a href="{{ route('pwa.pages.visits.detail', $visitPlan->id) }}" class="back-btn">‹ Detail Kunjungan</a>
@@ -130,7 +130,7 @@
                 @endforeach
                 <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                     <div style="font-size:0.82rem;color:#616876">{{ $selectedCount }} invoice dipilih</div>
-                    <div style="font-weight:700;color:#206bc4">Rp {{ number_format($total, 0, ',', '.') }}</div>
+                    <div style="font-weight:700;color:#f59e0b">Rp {{ number_format($total, 0, ',', '.') }}</div>
                 </div>
             </div>
         </div>
@@ -191,7 +191,7 @@
         @if ($selectedCount > 0)
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div style="font-size:0.82rem;color:#616876">Akan dibayar</div>
-            <div style="font-size:1.1rem;font-weight:800;color:#206bc4">Rp {{ number_format($total, 0, ',', '.') }}</div>
+            <div style="font-size:1.1rem;font-weight:800;color:#f59e0b">Rp {{ number_format($total, 0, ',', '.') }}</div>
         </div>
         @endif
         <button

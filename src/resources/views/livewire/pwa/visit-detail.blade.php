@@ -8,23 +8,23 @@
         .falaya-card--danger  { border-color: #d63939; background: #fff5f5; }
         .falaya-card--success { border-color: #2fb344; background: #f4fdf5; }
         .falaya-card--warning { border-color: #f59f00; background: #fffbf0; }
-        .falaya-card--info    { border-color: #206bc4; background: #f0f6ff; }
+        .falaya-card--info    { border-color: #64748b; background: #f1f5f9; }
         .falaya-card__title   { font-weight: 600; font-size: 1rem; color: #1a1a2e; }
         .falaya-card__subtitle { font-size: 0.875rem; color: #616876; }
-        .action-btn-primary { width: 100%; min-height: 52px; border-radius: 10px; border: none; background: #206bc4; color: white; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .action-btn-primary:active { background: #1a5aa8; }
-        .action-btn-outline { width: 100%; min-height: 52px; border-radius: 10px; border: 2px solid #206bc4; background: white; color: #206bc4; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .action-btn-primary { width: 100%; min-height: 52px; border-radius: 10px; border: none; background: #f59e0b; color: white; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .action-btn-primary:active { background: #d97706; }
+        .action-btn-outline { width: 100%; min-height: 52px; border-radius: 10px; border: 2px solid #f59e0b; background: white; color: #b45309; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .action-btn-outline:active { background: #f0f6ff; }
         .action-btn-danger { width: 100%; min-height: 52px; border-radius: 10px; border: none; background: #d63939; color: white; font-weight: 600; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .gps-loading { display: flex; flex-direction: column; align-items: center; padding: 24px; gap: 12px; }
-        .spinner-ring { width: 40px; height: 40px; border: 3px solid #e6e7e9; border-top-color: #206bc4; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .spinner-ring { width: 40px; height: 40px; border: 3px solid #e6e7e9; border-top-color: #b45309; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .invoice-mini { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
         .invoice-mini:last-child { border-bottom: none; }
         .mini-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
         .mini-row:last-child { border-bottom: none; }
         .credit-bar { height: 8px; border-radius: 4px; background: #e6e7e9; overflow: hidden; margin-top: 6px; }
-        .credit-bar__fill { height: 100%; border-radius: 4px; background: #206bc4; transition: width 0.3s; }
+        .credit-bar__fill { height: 100%; border-radius: 4px; background: #f59e0b; transition: width 0.3s; }
         .small-link { font-size: 0.82rem; color: #616876; text-decoration: none; text-align: center; display: block; padding: 6px; background: none; border: none; }
         .small-link:active { color: #374151; }
         .back-btn { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #616876; text-decoration: none; padding: 12px 16px 4px; }
@@ -42,12 +42,12 @@
         <div class="falaya-card p-3 mb-3">
             <div class="d-flex justify-content-between align-items-start mb-1">
                 <div class="falaya-card__title" style="font-size:1.05rem">{{ $visit->customer->customer_name }}</div>
-                <span style="font-size:0.72rem;font-weight:600;padding:3px 9px;border-radius:20px;background:{{ $visit->customer->customer_type === 'CREDIT' ? '#dbeafe' : '#dcfce7' }};color:{{ $visit->customer->customer_type === 'CREDIT' ? '#1d4ed8' : '#15803d' }}">
-                    {{ $visit->customer->customer_type === 'CREDIT' ? '💳 KREDIT' : '💵 CASH' }}
+                <span style="font-size:0.72rem;font-weight:600;padding:3px 9px;border-radius:20px;background:{{ $visit->customer->customer_type === 'CREDIT' ? '#fffbeb' : '#dcfce7' }};color:{{ $visit->customer->customer_type === 'CREDIT' ? '#b45309' : '#15803d' }}">
+                    @if($visit->customer->customer_type === 'CREDIT')<x-heroicon-o-credit-card style="width:13px;height:13px;color:#64748b;display:inline;vertical-align:-2px;margin-right:3px" />KREDIT @else<x-heroicon-o-banknotes style="width:13px;height:13px;color:#64748b;display:inline;vertical-align:-2px;margin-right:3px" />CASH @endif
                 </span>
             </div>
             <div class="falaya-card__subtitle">{{ $visit->customer->address }}</div>
-            <div style="font-size:0.78rem;color:#9ca3af;margin-top:4px">📍 {{ $visit->customer->area->area_name }}</div>
+            <div style="font-size:0.78rem;color:#9ca3af;margin-top:4px"><x-heroicon-o-map-pin style="width:12px;height:12px;color:#9ca3af;display:inline;vertical-align:-2px;margin-right:3px" />{{ $visit->customer->area->area_name }}</div>
         </div>
     </div>
 
@@ -57,11 +57,11 @@
         $limit = $visit->customer->credit_limit;
         $remaining = max(0, $limit - $used);
         $usedPct = $limit > 0 ? min(100, round($used / $limit * 100)) : 0;
-        $barColor = $usedPct >= 90 ? '#d63939' : ($usedPct >= 70 ? '#f59f00' : '#206bc4');
+        $barColor = $usedPct >= 90 ? '#d63939' : ($usedPct >= 70 ? '#f59f00' : '#f59e0b');
     @endphp
     <div class="px-3">
         <div class="falaya-card {{ $usedPct >= 90 ? 'falaya-card--danger' : 'falaya-card--info' }} p-3 mb-3">
-            <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-bottom:6px">💳 LIMIT KREDIT</div>
+            <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-bottom:6px"><x-heroicon-o-credit-card style="width:13px;height:13px;color:#6b7280;display:inline;vertical-align:-2px;margin-right:3px" />LIMIT KREDIT</div>
             <div class="d-flex justify-content-between align-items-baseline mb-1">
                 <div>
                     <span style="font-size:0.78rem;color:#6b7280">Terpakai</span>
@@ -133,7 +133,7 @@
         <template x-if="gpsState === 'idle'">
             <div>
                 <button @click="startCheckin()" class="action-btn-primary mb-3">
-                    📍 Check-in Sekarang
+                    <x-heroicon-o-map-pin style="width:18px;height:18px;color:white;display:inline;vertical-align:-2px;margin-right:3px" />Check-in Sekarang
                 </button>
             </div>
         </template>
@@ -142,7 +142,7 @@
             <div class="falaya-card falaya-card--info p-3 mb-3">
                 <div class="gps-loading">
                     <div class="spinner-ring"></div>
-                    <div style="font-weight:600;color:#206bc4">📡 Mengambil GPS...</div>
+                    <div style="font-weight:600;color:#f59e0b"><x-heroicon-o-signal style="width:16px;height:16px;color:#f59e0b;display:inline;vertical-align:-2px;margin-right:3px" />Mengambil GPS...</div>
                     <div style="font-size:0.82rem;color:#3b5ea6">Tunggu sebentar</div>
                 </div>
             </div>
@@ -152,20 +152,20 @@
             <div>
                 <div class="falaya-card falaya-card--success p-3 mb-2">
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <span style="font-size:1.2rem">✅</span>
+                        <x-heroicon-o-check-circle style="width:20px;height:20px;color:#15803d" />
                         <div class="falaya-card__title" style="color:#15803d">Lokasi Terverifikasi</div>
                     </div>
                     <div style="font-size:0.85rem;color:#166534" x-text="'Jarak ' + gpsInfo.distance + 'm dari outlet'"></div>
                     <div style="font-size:0.78rem;color:#4ade80;margin-top:2px" x-show="gpsInfo.acc <= 20">Akurasi GPS sangat baik</div>
                 </div>
                 <div class="falaya-card p-3 mb-3" x-show="!photoTaken">
-                    <div style="font-size:0.85rem;color:#616876;margin-bottom:10px">📷 <strong>Ambil foto outlet</strong> sebagai bukti kunjungan</div>
+                    <div style="font-size:0.85rem;color:#616876;margin-bottom:10px"><x-heroicon-o-camera style="width:14px;height:14px;color:#616876;display:inline;vertical-align:-2px;margin-right:3px" /><strong>Ambil foto outlet</strong> sebagai bukti kunjungan</div>
                     <label style="display:block;cursor:pointer">
                         <input type="file" accept="image/*" capture="environment" class="d-none"
                             wire:model="visitPhoto"
                             @change="photoTaken = true">
-                        <div style="border:2px dashed #206bc4;border-radius:10px;padding:24px;text-align:center;color:#206bc4">
-                            <div style="font-size:2rem;margin-bottom:4px">📷</div>
+                        <div style="border:2px dashed #f59e0b;border-radius:10px;padding:24px;text-align:center;color:#f59e0b">
+                            <div style="margin-bottom:4px;display:flex;justify-content:center"><x-heroicon-o-camera style="width:32px;height:32px;color:#f59e0b" /></div>
                             <div style="font-weight:600;font-size:0.9rem">Buka Kamera</div>
                             <div style="font-size:0.75rem;color:#9ca3af;margin-top:2px">Foto tampak depan outlet</div>
                         </div>
@@ -173,7 +173,7 @@
                 </div>
                 <div class="falaya-card falaya-card--success p-3 mb-3" x-show="photoTaken">
                     <div class="d-flex align-items-center gap-2">
-                        <span>📸</span>
+                        <x-heroicon-o-check-circle style="width:20px;height:20px;color:#15803d" />
                         <div>
                             <div style="font-weight:600;color:#15803d;font-size:0.9rem">Foto berhasil diambil</div>
                             <div style="font-size:0.78rem;color:#166534">Siap untuk check-in</div>
@@ -186,7 +186,7 @@
                     :disabled="!photoTaken"
                     :style="!photoTaken ? 'opacity:0.5' : ''"
                 >
-                    ✅ Konfirmasi Check-in
+                    <x-heroicon-o-check-circle style="width:18px;height:18px;color:white;display:inline;vertical-align:-2px;margin-right:3px" />Konfirmasi Check-in
                 </button>
                 <div style="font-size:0.78rem;color:#9ca3af;text-align:center;margin-bottom:12px" x-show="!photoTaken">
                     Ambil foto terlebih dahulu
@@ -198,7 +198,7 @@
             <div>
                 <div class="falaya-card falaya-card--danger p-3 mb-3">
                     <div class="d-flex align-items-start gap-2 mb-2">
-                        <span style="font-size:1.3rem">❌</span>
+                        <x-heroicon-o-x-circle style="width:22px;height:22px;color:#991b1b" />
                         <div>
                             <div class="falaya-card__title" style="color:#991b1b">Tidak Bisa Check-in</div>
                             <div style="font-size:0.85rem;color:#7f1d1d;margin-top:4px" x-text="'Jarak Anda ' + gpsInfo.distance + 'm dari outlet, melebihi radius ' + gpsInfo.radius + 'm yang diizinkan.'"></div>
@@ -207,7 +207,7 @@
                     <div style="font-size:0.82rem;color:#9b1c1c">Pastikan Anda berada di lokasi outlet, lalu coba lagi.</div>
                 </div>
                 <button @click="gpsState = 'idle'" class="action-btn-primary mb-3" style="background:#d63939">
-                    🔄 Coba Lagi
+                    <x-heroicon-o-arrow-path style="width:16px;height:16px;color:white;display:inline;vertical-align:-2px;margin-right:3px" />Coba Lagi
                 </button>
             </div>
         </template>
@@ -216,18 +216,18 @@
             <div>
                 <div class="falaya-card falaya-card--warning p-3 mb-3">
                     <div class="d-flex align-items-start gap-2">
-                        <span style="font-size:1.2rem">⚠️</span>
+                        <x-heroicon-o-exclamation-triangle style="width:20px;height:20px;color:#b45309" />
                         <div>
-                            <div class="falaya-card__title" style="color:#92400e">Lokasi Tidak Terdeteksi</div>
+                            <div class="falaya-card__title" style="color:#b45309">Lokasi Tidak Terdeteksi</div>
                             <div style="font-size:0.85rem;color:#78350f;margin-top:4px">Anda tetap bisa check-in, namun lokasi tidak akan tercatat untuk kunjungan ini.</div>
                         </div>
                     </div>
                 </div>
                 <button @click="confirmCheckin()" class="action-btn-primary mb-2" style="background:#f59f00">
-                    ⚠️ Tetap Check-in Tanpa GPS
+                    <x-heroicon-o-exclamation-triangle style="width:16px;height:16px;color:white;display:inline;vertical-align:-2px;margin-right:3px" />Tetap Check-in Tanpa GPS
                 </button>
                 <button @click="gpsState = 'idle'" class="action-btn-outline mb-3">
-                    🔄 Coba Lagi
+                    <x-heroicon-o-arrow-path style="width:16px;height:16px;color:#b45309;display:inline;vertical-align:-2px;margin-right:3px" />Coba Lagi
                 </button>
             </div>
         </template>
@@ -235,14 +235,14 @@
         <div>
             @if ($actionError)
             <div class="falaya-card falaya-card--danger p-3 mb-3">
-                <div style="font-size:0.85rem;color:#991b1b">⚠️ {{ $actionError }}</div>
+                <div style="font-size:0.85rem;color:#991b1b"><x-heroicon-o-exclamation-triangle style="width:14px;height:14px;color:#991b1b;display:inline;vertical-align:-2px;margin-right:3px" />{{ $actionError }}</div>
             </div>
             @endif
 
             @if ($outstandingTotal > 0)
             <div class="falaya-card falaya-card--warning p-3 mb-3">
-                <div style="font-size:0.75rem;font-weight:600;color:#92400e;margin-bottom:8px">⚠️ TAGIHAN OUTSTANDING</div>
-                <div style="font-size:1.25rem;font-weight:700;color:#92400e;margin-bottom:8px">Rp {{ number_format($outstandingTotal, 0, ',', '.') }}</div>
+                <div style="font-size:0.75rem;font-weight:600;color:#b45309;margin-bottom:8px"><x-heroicon-o-exclamation-triangle style="width:13px;height:13px;color:#b45309;display:inline;vertical-align:-2px;margin-right:3px" />TAGIHAN OUTSTANDING</div>
+                <div style="font-size:1.25rem;font-weight:700;color:#b45309;margin-bottom:8px">Rp {{ number_format($outstandingTotal, 0, ',', '.') }}</div>
                 @foreach ($outstandingInvoices->take(2) as $inv)
                 <div class="invoice-mini">
                     <div>
@@ -250,15 +250,15 @@
                         <div style="font-size:0.75rem;color:#6b7280">Rp {{ number_format($inv['remaining_amount'], 0, ',', '.') }}</div>
                     </div>
                     @if ($inv['is_overdue'])
-                    <span style="font-size:0.7rem;padding:2px 7px;border-radius:20px;background:#fee2e2;color:#991b1b;font-weight:600">🔴 Terlambat {{ $inv['days_overdue'] }}h</span>
+                    <span style="font-size:0.7rem;padding:2px 7px;border-radius:20px;background:#fef2f2;color:#991b1b;font-weight:600"><x-heroicon-o-exclamation-circle style="width:12px;height:12px;color:#991b1b;display:inline;vertical-align:-2px;margin-right:3px" />Terlambat {{ $inv['days_overdue'] }}h</span>
                     @elseif ($inv['due_soon'])
-                    <span style="font-size:0.7rem;padding:2px 7px;border-radius:20px;background:#fef9c3;color:#854d0e;font-weight:600">⏰ {{ $inv['days_to_due'] }}h lagi</span>
+                    <span style="font-size:0.7rem;padding:2px 7px;border-radius:20px;background:#fef9c3;color:#854d0e;font-weight:600"><x-heroicon-o-clock style="width:12px;height:12px;color:#854d0e;display:inline;vertical-align:-2px;margin-right:3px" />{{ $inv['days_to_due'] }}h lagi</span>
                     @endif
                 </div>
                 @endforeach
                 <a href="{{ route('pwa.pages.visits.collection', $visit->id) }}" class="d-block w-100 mt-3 py-2 text-center fw-600"
                    style="background:#f59f00;color:white;border-radius:8px;text-decoration:none;font-weight:600;min-height:44px;line-height:2.5">
-                    💰 Tagih Sekarang
+                    <x-heroicon-o-banknotes style="width:16px;height:16px;color:white;display:inline;vertical-align:-2px;margin-right:3px" />Tagih Sekarang
                 </a>
             </div>
             @endif
@@ -269,7 +269,7 @@
                 @foreach ($visitOrders as $so)
                 <div class="mini-row">
                     <div>
-                        <div style="font-weight:600;color:#1a1a2e">🛒 {{ $so->document_number }}</div>
+                        <div style="font-weight:600;color:#1a1a2e"><x-heroicon-o-shopping-cart style="width:14px;height:14px;color:#1a1a2e;display:inline;vertical-align:-2px;margin-right:3px" />{{ $so->document_number }}</div>
                         <div style="font-size:0.75rem;color:#9ca3af">{{ $so->payment_type }} · {{ $so->status }}</div>
                     </div>
                     <div style="font-weight:600;color:#1a1a2e">Rp {{ number_format($so->total_amount, 0, ',', '.') }}</div>
@@ -278,7 +278,7 @@
                 @foreach ($visitPayments as $pay)
                 <div class="mini-row">
                     <div>
-                        <div style="font-weight:600;color:#1a1a2e">💰 {{ $pay->payment_number }}</div>
+                        <div style="font-weight:600;color:#1a1a2e"><x-heroicon-o-banknotes style="width:14px;height:14px;color:#1a1a2e;display:inline;vertical-align:-2px;margin-right:3px" />{{ $pay->payment_number }}</div>
                         <div style="font-size:0.75rem;color:#9ca3af">{{ $pay->payment_method }} · {{ $pay->status }}</div>
                     </div>
                     <div style="font-weight:600;color:#1a1a2e">Rp {{ number_format($pay->total_amount, 0, ',', '.') }}</div>
@@ -289,19 +289,19 @@
 
             @if (! $hasPostedOrder)
             <a href="{{ route('pwa.pages.visits.order', $visit->id) }}" class="action-btn-primary mb-2 d-flex" style="text-decoration:none">
-                🛒 Buat Pesanan
+                <x-heroicon-o-shopping-cart style="width:18px;height:18px;color:white;display:inline;vertical-align:-2px;margin-right:3px" />Buat Pesanan
             </a>
             @endif
             <a href="{{ route('pwa.pages.visits.collection', $visit->id) }}" class="action-btn-outline mb-3 d-flex" style="text-decoration:none">
-                💰 Catat Pembayaran
+                <x-heroicon-o-banknotes style="width:18px;height:18px;color:#b45309;display:inline;vertical-align:-2px;margin-right:3px" />Catat Pembayaran
             </a>
 
             <div class="d-flex justify-content-around">
                 @if (! $hasPostedOrder && $visit->status === 'PLANNED')
-                <button type="button" class="small-link" @click="showOutletClosedConfirm = true">🔒 Outlet Tutup</button>
+                <button type="button" class="small-link" @click="showOutletClosedConfirm = true"><x-heroicon-o-lock-closed style="width:14px;height:14px;color:#616876;display:inline;vertical-align:-2px;margin-right:3px" />Outlet Tutup</button>
                 <span style="color:#e6e7e9">|</span>
                 @endif
-                <button type="button" class="small-link" style="color:#206bc4" @click="showCheckoutConfirm = true">✅ Check-out</button>
+                <button type="button" class="small-link" style="color:#f59e0b" @click="showCheckoutConfirm = true"><x-heroicon-o-check-circle style="width:14px;height:14px;color:#f59e0b;display:inline;vertical-align:-2px;margin-right:3px" />Check-out</button>
             </div>
         </div>
         @endif
@@ -309,7 +309,7 @@
         @if ($isDone)
         <div class="falaya-card falaya-card--success p-3 mb-3">
             <div class="text-center">
-                <div style="font-size:2rem;margin-bottom:6px">✅</div>
+                <div style="margin-bottom:6px;display:flex;justify-content:center"><x-heroicon-o-check-circle style="width:32px;height:32px;color:#15803d" /></div>
                 <div style="font-weight:600;color:#15803d">Kunjungan Selesai</div>
                 @switch($visit->status)
                     @case('COMPLETED')   <div style="font-size:0.85rem;color:#166534">Ada order yang dibuat</div> @break
@@ -325,7 +325,7 @@
 
         <div class="confirm-overlay" x-show="showOutletClosedConfirm" x-cloak @click.self="showOutletClosedConfirm = false">
             <div class="confirm-modal">
-                <div class="confirm-modal__title">🔒 Tandai Outlet Tutup?</div>
+                <div class="confirm-modal__title d-flex align-items-center gap-2"><x-heroicon-o-lock-closed style="width:18px;height:18px" /> Tandai Outlet Tutup?</div>
                 <div class="confirm-modal__body">Kunjungan ini akan ditandai selesai tanpa check-in. Pastikan outlet benar-benar tidak buka.</div>
                 <div class="d-flex gap-2">
                     <button type="button" class="action-btn-outline" style="min-height:44px" @click="showOutletClosedConfirm = false">Batal</button>
@@ -336,7 +336,7 @@
 
         <div class="confirm-overlay" x-show="showCheckoutConfirm" x-cloak @click.self="showCheckoutConfirm = false">
             <div class="confirm-modal">
-                <div class="confirm-modal__title">✅ Selesaikan Kunjungan?</div>
+                <div class="confirm-modal__title d-flex align-items-center gap-2"><x-heroicon-o-check-circle style="width:18px;height:18px;color:#15803d" /> Selesaikan Kunjungan?</div>
                 <div class="confirm-modal__body">Pastikan semua pesanan dan pembayaran di outlet ini sudah tercatat sebelum check-out.</div>
                 <div class="d-flex gap-2">
                     <button type="button" class="action-btn-outline" style="min-height:44px" @click="showCheckoutConfirm = false">Batal</button>
