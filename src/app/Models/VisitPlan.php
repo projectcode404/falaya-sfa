@@ -40,7 +40,7 @@ class VisitPlan extends Model
 
     public function payments()
     {
-        return $this->hasMany(\App\Models\Payment::class, 'visit_plan_id');
+        return $this->hasMany(Payment::class, 'visit_plan_id');
     }
 
     public function salesOrders()

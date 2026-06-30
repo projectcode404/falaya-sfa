@@ -1,5 +1,7 @@
 <?php
+
 namespace Database\Seeders;
+
 use App\Actions\Sales\CreateSalesOrderAction;
 use App\Actions\Sales\PostSalesOrderAction;
 use App\Models\Customer;
@@ -9,6 +11,7 @@ use App\Models\User;
 use App\Models\VisitPlan;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
+
 class CreditInvoiceSeeder extends Seeder
 {
     public function run(): void
@@ -44,15 +47,15 @@ class CreditInvoiceSeeder extends Seeder
             // secara normal lewat UI. Status IN_PROGRESS hanya boleh di-set
             // melalui flow check-in yang sesungguhnya, bukan langsung di DB.
             $visitPlan = VisitPlan::create([
-                'salesman_id'       => $salesman->id,
-                'customer_id'       => $customer->id,
-                'operational_date'  => now()->toDateString(),
-                'is_planned'        => false,
-                'area_id_snapshot'  => $customer->area_id,
+                'salesman_id' => $salesman->id,
+                'customer_id' => $customer->id,
+                'operational_date' => now()->toDateString(),
+                'is_planned' => false,
+                'area_id_snapshot' => $customer->area_id,
                 'visit_schedule_id' => null,
-                'status'            => 'PLANNED',
-                'created_by'        => $salesman->id,
-                'created_at'        => now(),
+                'status' => 'PLANNED',
+                'created_by' => $salesman->id,
+                'created_at' => now(),
             ]);
             // Sales Order untuk demo outstanding — dibuat tanpa check-in
             // terlebih dahulu supaya ada piutang yang bisa ditagih.
@@ -65,7 +68,7 @@ class CreditInvoiceSeeder extends Seeder
                 'CREDIT',
                 [[
                     'product_id' => $product->id,
-                    'qty'        => $orderQty,
+                    'qty' => $orderQty,
                     'unit_price' => (float) $product->selling_price,
                 ]],
                 'Demo Seeder'

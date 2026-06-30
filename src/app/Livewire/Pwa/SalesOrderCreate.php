@@ -8,6 +8,7 @@ use App\Actions\Sales\RequestCreditOverrideAction;
 use App\Models\Invoice;
 use App\Models\StockBalance;
 use App\Models\VisitPlan;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -150,7 +151,7 @@ class SalesOrderCreate extends Component
             $this->redirect(route('pwa.pages.visits.detail', $this->visitPlan->id), navigate: false);
 
             return;
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if (str_contains($e->getMessage(), 'uq_one_active_so_per_visit')) {
                 $this->submitError = 'Kunjungan ini sudah punya pesanan aktif. Muat ulang halaman untuk melihat status terkini.';
 
